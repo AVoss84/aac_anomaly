@@ -1,5 +1,0 @@
-setup.py
-aac_ts_anomaly.egg-info/PKG-INFO
-aac_ts_anomaly.egg-info/SOURCES.txt
-aac_ts_anomaly.egg-info/dependency_links.txt
-aac_ts_anomaly.egg-info/top_level.txt
