@@ -1,6 +1,6 @@
 # Package for anomaly detection in claims time series
 
-Claims anomaly detection using an ensemble of seasonal time series methods. 
+Claims anomaly detection using an ensemble of seasonal time series methods. Preprocessing is done via (hierarchically) aggregating the data to various univariate time series. 
 
 <img src= "https://openclipart.org/image/400px/svg_to_png/319677/microscope-retro.png" width="80" />
 
