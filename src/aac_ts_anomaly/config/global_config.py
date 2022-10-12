@@ -16,7 +16,7 @@ using = 'vm'                   # own virtual machine
 if using == 'vm':
     defaults = {
             "UC_CODE_DIR": str(Path.home() / "Documents/GitHub/aac_anomaly/src"),       
-            "UC_DATA_DIR": str(Path.home() / "Documents/Arbeit/Allianz/AZVers/data"),           # SFTP input
+            "UC_DATA_DIR": str(Path.home() / "Documents/Arbeit/Allianz/AZVers/data"),                      
             #"UC_REPORT_DIR": "/data/data/submission/report/",            # SFTP output 
             "UC_DATA_PKG_DIR": str(Path.home() / "Documents/GitHub/aac_anomaly/src/aac_ts_anomaly/data/"),    # data folder within package
             #"UC_DB_CONNECTION": 'postgresql://postgres:kakYritiven@agcs-postgres-1-server.service.dsp.allianz/prod',
