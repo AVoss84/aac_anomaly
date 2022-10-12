@@ -11,8 +11,6 @@ Claims anomaly detection using an ensemble of seasonal time series methods. This
 conda env create -f environment.yml
 ```
 
-### Requirements
-
 To install the package locally, execute the following steps:
 
 ```bash
