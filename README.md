@@ -1,6 +1,6 @@
 # Package for anomaly detection in claims time series
 
-An ensemble of different time series anomaly detection methods is being constructed to estimate the probability of an anomaly at time $t$. Preprocessing is done via (hierarchically) aggregating the data to univariate time series. If certain criteria are not met (e.g. minimum sample size), then a particular time series is further aggregated (i.e. aggregation follows a binary-tree). 
+An ensemble of different time series anomaly detection methods is being constructed to estimate the probability of an anomaly at time $t$. Preprocessing is done via (hierarchically) aggregating the data to univariate conditional time series. If certain criteria are not met (e.g. minimum sample size), then a particular time series is further aggregated (i.e. aggregation follows a binary-tree). 
 
 <img src= "https://openclipart.org/image/400px/svg_to_png/319677/microscope-retro.png" width="80" />
 
