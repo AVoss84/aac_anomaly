@@ -1,0 +1,146 @@
+actuarial_to_cll:
+    Sub Line of Business:
+        # Actuarial (old) : CLL (new)
+        ART LoB : ART LOB
+        ART CAPITAL SOLUTIONS : CAPITAL SOLUTIONS
+        Capital Solutions : CAPITAL SOLUTIONS
+        CROP : Crop
+        CONSTRUCTION : EC Construction 
+        Energy Offshore : EC Offshore
+        Energy Onshore : EC Onshore
+        PERSONAL LINES : Personal Lines
+        
+    Region:    
+        ASIA : AP_BRANCHES
+        Asia FM : AP_BRANCHES
+        Brazil : ILA_BRAZIL
+        #CEE : ?
+        Africa : MEDA_S_AFRICA
+        France : MEDA_FRANCE
+        CH_AT : CEE_AUSTRIA
+        Canada : NA_CANADA
+        France : MEDA_FRANCE
+        Germany : CEE_GERMANY
+        Hong Kong : AP_BRANCHES
+        #ILA_REINSURED : ?
+        ITALY : MEDA_ITALY
+        Japan : AP_JAPAN
+        #MEDA_REINSURED : ?
+        #Mediterranean : ?
+        MediterraneanxFRxIT: MEDA_FRANCE   #?
+        #Middle East : ?
+        NA_BERMUDA_BR : ILA_BRAZIL   # ?
+        Nordic : RUL_DK_SE
+        Pacific : AP_PACIFIC
+        #REST_FRONTING : ?
+        RULxUK : RUL_UK
+        Singapore : AP_BRANCHES
+        South America : ILA_BRAZIL
+        South Korea : AP_BRANCHES
+        UK : RUL_UK
+        US : NA_US
+        
+    Branch:
+        AT : EXDE
+        BE : EXDE
+        CH00 : CH__
+        CH01 : CH__
+        CH22 : CH__
+        CHX3 : CH__
+        DK : EXDE
+        ES : EXDE
+        FR : EXDE
+        HK : EXDE
+        IT : EXDE
+        JP : DE
+        KR : EXDE
+        NL : EXDE
+        NL59 : EXDE
+        SE : EXDE
+        SG : EXDE
+        UK : EXDE
+        US88 : US 
+        US89 : US 
+
+cll:
+    Branch Code:
+        # Old : New
+        London : UK01
+        Milton Keynes : UK01
+    OE:
+        INDIA: India
+ 
+
+mvmt_to_cll:
+    Sub Line of Business:
+        # OLD : NEW
+        ART LoB : ART LOB
+        Aerospace : Aviation Aerospace
+        Airlines : Aviation Airlines
+        Airports : Aviation Airlines
+        Aviation : Aviation Airlines
+        CapSol LoB : CAPITAL SOLUTIONS
+        Packages : Package
+    Actuarial Branch:
+        FFIC : US
+
+
+planned_to_cll:
+    Sub Line of Business:
+        # OLD : NEW
+        ART LoB : ART LOB
+        #Aviation Space : Aviation Aerospace
+        Aviation Manufacture : Aviation Aerospace
+        Energy Offshore : EC Offshore
+        Energy Onshore : EC Onshore
+        Construction : EC Construction
+        FinLines (Fin.Inst.) : FL Financial Institutions
+        Financial Lines Cybe : FL Cyber and TPI
+        FinLines (Com.Risk): FL Commercial Risks
+        Financial Lines Prof : FL Professional Indemnity
+        Liability PharmChem: Liability Pharm Chem
+        Liability General : Liability Main
+        Property General : Property
+        Others General : Others
+        LIVE : Entertainment Live
+        RG AGRIBUSINESS: MC Agribusiness
+        Programs: MC Programs
+        CROP : MC Agribusiness
+        PRODUCTION: Entertainment Production
+        CAPITAL SOLUTION : ART LOB
+        RG MIDDLE MARKET BUS : MC Middle Market Business
+        RG PERSONAL LINES: Personal Lines
+        Engineering IDI : EC Construction     #?
+        Marine XL : Marine Cargo
+    OE:
+        Austrian Branch : Austria
+        Austrian Run-Off : Austria
+        Belgium Branch : Belgium
+        Belgium Run-Off : Belgium
+        Brazil R/I : Brazil
+        AGCS Brazil: Brazil
+        CHINA : China
+        Dubai Run-Off : Dubai
+        FFIC : US
+        French Branch: France
+        AGCS France: France
+        German Branch: Germany
+        Hong Kong Branch: Hong Kong
+        Hong Kong Run-Off: Hong Kong
+        Indian Branch: India
+        Indian Pre-Branch: India
+        Italian Branch: Italy
+        Italian Run-Off: Italy
+        Netherlands Branch : Netherlands
+        Netherlands Run-Off: Netherlands
+        Singapore Branch: Singapore
+        ART Swiss Branch: Switzerland
+        Spain R/I: Spain
+        Spanish Branch: Spain
+        AGCS South Africa: South Africa
+        UK Branch: UK
+        UK Run-Off: UK
+        AGCS North America: US
+        ART New York: US
+        
+

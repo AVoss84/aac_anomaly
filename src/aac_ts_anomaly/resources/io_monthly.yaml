@@ -1,0 +1,40 @@
+input:
+     known_file_names:
+          AGCS CCO CRA - Notification Counts : 52
+          AGCS CCO CRA - Payment Counts : 12
+          AGCS CCO CRA - Monthly Incurred amounts : 12
+  
+detection:
+  preprocessing:
+       aggreg_level : 'all_combi'   # ['all_combi', 'region_only', 'lob_only'] 
+       pre_filter : "Region!='South America'"
+       ignore_lag : 1
+       min_sample_size : 30
+       min_median_target :            # blank induces None
+  training: 
+       outlier_filter :         # None by default; extend [..[ to [...]
+       stat_transform : ['none']    # ['none','diff', 'log','diff_log']
+       hyper_para: 
+          QuantileAD : {'high': 0.99, 'low' : 0.01}              
+          PersistAD : {'side' : 'both', 'window': 6}   #'c' : 1.5, 
+          GeneralizedESDTestAD : {'alpha' : 0.3}
+          LevelShiftAD : {'side': 'both', 'window': 6}             # 'c': 1.3, 
+          VolatilityShiftAD : {'side': 'positive', 'window': 6, 'agg' : 'iqr'}    # 'c': 1.3, 
+          InterQuartileRangeAD : {'c': 1.3}
+          AutoregressionAD : {'n_steps': 2, 'step_size': 1, 'side':  'both'}    # 'c': 1.3,
+          #OutlierDetector : {'model' : 'LocalOutlierFactor(contamination=0.01)'}
+       transformers:
+          ClassicSeasonalDecomposition : {'freq' : 12, 'trend' : False}  
+          #RollingAggregate: {'agg':'mean', 'window': 3}
+          #DoubleRollingAggregate : {'agg':'mean', 'window':3, 'diff': 'diff'}
+  prediction:
+       n_step_ahead : 1
+       detect_thresh: 0.51
+
+output:
+  report_filename: 'claims_anomaly_report_incurred'
+  database:      
+        write_table: false
+        tbl_name: 'claims_reporting_anomalies_incurred'       # set prod/dev in global_config
+
+     

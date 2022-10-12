@@ -1,0 +1,123 @@
+XLS_columns:
+- Reserving Segment ID
+- Legal Entity
+- Branch
+- Region
+- LRC Group
+- LoB
+- Classifier
+- Layer
+- Reporting period
+- Currency
+- FX rate
+- AY
+- Original Net Plan Ratio
+- Exp Adj Plan Earned Premium
+- Exp Adj Plan Loss - Attritional
+- Exp Adj Plan Loss - Medium
+- Exp Adj Plan Loss - Large
+- Exp Adj Plan Loss - Cat
+- Exp Adj Plan ULAE
+- Earned Premium
+- Claims Paid
+- Case Reserves
+- KBNA
+- Actual loss incl KBNA - Attritional
+- Actual loss incl KBNA - Medium
+- Actual loss incl KBNA - Large
+- Actual loss incl KBNA - Cat
+- ULAE Paid
+- ULAE Reserves
+- Selected IBNR excl KBNA - Attritional
+- Selected IBNR excl KBNA - Medium
+- Selected IBNR excl KBNA - Large
+- Selected IBNR excl KBNA - Cat
+- BE IBNR
+- OE IBNR
+- BE IBNR excl OE IBNR
+- Management IBNR - Attritional
+- Management IBNR - Medium
+- Management IBNR - Large
+- Management IBNR - Cat
+- BF IBNR - Attritional
+- BF IBNR - Medium
+- BF IBNR - Large
+- BF IBNR - Cat
+- Expected Movement - Attritional
+- Expected Movement - Medium
+- Expected Movement - Large
+- Expected Movement - Cat
+- Comments
+- NLR_EXP_ADJ_ULT_ATT
+- NLR_EXP_ADJ_ULT_LGE
+- NLR_EXP_ADJ_ULT_CAT
+- Coverted to
+- FX Conversion Factor
+- Case & IBNR reserves c/f
+- Plan Earned Premiums
+- Plan loss - attritional
+- Plan loss - medium
+- Plan loss - large
+- Plan loss - cat
+- Plan loss - ULAE
+- Earned Premiums
+- Expo Adj. Plan loss - attritional
+- Expo Adj. Plan loss - medium
+- Expo Adj. Plan loss - large
+- Expo Adj. Plan loss - cat
+- Expo Adj. Plan loss - ULAE
+- Ultimate loss incl. KBNA - attritional
+- Actual incurred incl. KBNA - attritional
+- Ultimate loss incl. KBNA - medium
+- Actual incurred incl. KBNA - medium
+- Ultimate loss incl. KBNA - large
+- Actual incurred incl. KBNA - large
+- Ultimate loss incl. KBNA - cat
+- Actual incurred incl. KBNA - cat
+- Ultimate loss incl. KBNA - Total
+- Actual incurred incl. KBNA - Total
+- Selected KBNA
+- Actual Case reserves
+- Selected attr IBNR
+- Selected med IBNR
+- Selected lge IBNR
+- Selected cat IBNR
+- Selected IBNR Total
+- Incd ULAE
+- Incd Bad debt
+- Dummy Zeros
+- BF IBNR att
+- BF IBNR med
+- BF IBNR lge
+- BF IBNR cat
+- Region Key
+- New Region
+- New Region for split
+- Expected att
+- Expected med
+- Expected lge
+- Expected cat
+- STLT
+- LoB/Classifier
+- Maybe_ST
+- KBNA2
+- Selection Key LR details TOTAL
+- Selection Key LR details LoB
+- Selection Key LR details subLoB
+- Selection Key LR Region details TOTAL
+- Selection Key LR Region details LoB
+- Selection Key LR Region details subLoB
+- Selection Key LR Region-split details subLoB
+- Selection Key AvsE SoaP
+- NLR Ult_att
+- NLR Ult_lge
+- NLR Ult_cat
+- NLR Ult
+- STLT2
+- CAY med loss MLC
+- CAY med KBNA
+- CAY lge KBNA
+- CAY cat KBNA
+- selected CAY med KBNA
+- selected CAY lge KBNA
+- selected CAY cat KBNA
