@@ -151,16 +151,14 @@ class claims_reporting(AbstractPreprocessor):
         ts_bag = {}
 
         ##################################################
-        # Level 1 (LOB - OE - Region - Tier)
+        # Level 1 (LOB - Event_descr)
         ##################################################
 
         aggreg_dimensions1 = aggreg_dimensions.copy()
-        print("Aggregation level 1: {}".format(aggreg_dimensions1))
+        if self.verbose: print("Aggregation level 1: {}".format(aggreg_dimensions1))
         gr = data_lev1.groupby(aggreg_dimensions1)
-        #gr = data_lev1.groupby(['Region', 'OE', 'Lob', 'Tier'])
 
         sample1 = gr.agg(size=(self.target_col, 'count'), q_50_target=(self.target_col, self.q_50)).reset_index()
-
         if self.min_median_target is None:
                 sample1['pooling'] = ((sample1['size'] < self.min_sample_size)*1).astype(object)
         else:
@@ -175,18 +173,33 @@ class claims_reporting(AbstractPreprocessor):
         
         for _, ts_info in lookup_level1_singles.iterrows():
                 combi = tuple(ts_info[:len(aggreg_dimensions1)])
-                #combi = tuple(ts_info[:len(['Region', 'OE', 'Lob', 'Tier'])])
-                ts_slice = gr.get_group(combi).reset_index()
-                ts_slice['year'] = ts_slice['time'].apply(lambda x: x[:4]).astype(int)
+                #combi = tuple(ts_info[:len(['Lob','Event_descr'])])
+                ts_slice_grouped = gr.get_group(combi)
+                ts_slice = ts_slice_grouped.set_index('time', inplace=False)['target'].reset_index()
+                # Format dates from 'YYYY-period' to 'YYYY-MM-01'
+                # needed so asfreq can recognize it as date index:
                 ts_slice['period'] = ts_slice['time'].apply(lambda x: x[5:]).astype(int)
+                ts_slice['year'] = ts_slice['time'].apply(lambda x: x[:4]).astype(int)
 
-                if self.periodicity == 52: 
-                        ts_slice['year_period_ts'] = ts_slice.apply(lambda row: self._year_week(row.year, row.period), axis=1)            
+                # Adjust frequencies in case of irregular time series 
+                # (i.e. missing timestamps, not full cycle)
+                #------------------------------------------------------
                 if self.periodicity == 12:
                         ts_slice['year_period_ts'] = ts_slice.apply(lambda row: self._convert2date(row.year, row.period), axis=1)
+                        my_series = ts_slice[['year_period_ts', 'target']].set_index('year_period_ts', inplace=False)
+                        ts_slice = my_series.asfreq(freq = 'MS', fill_value = 0.).reset_index().rename(columns={'year_period_ts' : 'time'})
+                        ts_slice['year'] = pd.DatetimeIndex(ts_slice['time']).year
+                        ts_slice['period'] = pd.DatetimeIndex(ts_slice['time']).month
+                        ts_slice['month'] = ts_slice['period']
+                        ts_slice['year_period_ts'] = ts_slice.apply(lambda row: self._convert2date(row.year, row.period), axis=1)
 
-                ts_slice['month'] = [x.month for x in ts_slice['year_period_ts'].tolist()]
-                ts_bag['-'.join(combi)] = ts_slice[['time', self.target_col, 'year', 'month','period']]
+                if self.periodicity == 52:
+                        ts_slice['year_period_ts'] = ts_slice.apply(lambda row: self._year_week(row.year, row.period), axis=1)
+                        ts_slice['month'] = [x.month for x in ts_slice['year_period_ts'].tolist()]
+
+                ts_bag['-'.join(combi)] = ts_slice[['time', 'target', 'year', 'month','period']]
+                #print('Level 1')
+                #print("Sample size {}".format(ts_bag['-'.join(combi)].shape))
 
         # Next take the left-overs (having too short time series) 
         # and aggregate further -> level 2
@@ -196,22 +209,64 @@ class claims_reporting(AbstractPreprocessor):
         
         if self.verbose:  print("Number of left over aggregations ('Level 1'):", lookup_level1_agg.shape[0])
 
-        # Finally do a an aggregation over only Tier:
-        #-------------------------------------------------
-        gr_full0 = df.groupby(['Event_descr']+['time'])
-        full_agg_series = gr_full0.agg(target = (self.target_col, self.agg_func)).reset_index()
-        full_agg_series['year'] = full_agg_series['time'].apply(lambda x: x[:4]).astype(int)
-        full_agg_series['period'] = full_agg_series['time'].apply(lambda x: x[5:]).astype(int)
+        ##################################################
+        # Level 2 (Event_descr)
+        ##################################################
+        
+        aggreg_dimensions1.remove('Lob')
+        aggreg_dimensions2 = aggreg_dimensions1.copy()
 
-        if self.periodicity == 52: 
-                full_agg_series['year_period_ts'] = full_agg_series.apply(lambda row: self._year_week(row.year, row.period), axis=1)
-        if self.periodicity == 12:
-                full_agg_series['year_period_ts'] = full_agg_series.apply(lambda row: self._convert2date(row.year, row.period), axis=1)
+        gr2 = data_lev2.groupby(aggreg_dimensions2 + ['time'])
+        if self.verbose: print("Aggregation level 2: {}".format(aggreg_dimensions2))
+        data_lev2_new = gr2.agg(target = (self.target_col, 'sum')).reset_index()     # aggregate
 
-        full_agg_series['month'] = [x.month for x in full_agg_series['year_period_ts'].tolist()]
+        # Check cluster size again for filtering:
+        #-------------------------------------------
+        gr2b = data_lev2_new.groupby(aggreg_dimensions2)
+        sample2 = gr2b.agg(size=(self.target_col,'count'), q_50_target=(self.target_col, self.q_50)).reset_index()
 
-        for lc in full_agg_series['Event_descr'].unique():
-            ts_bag['all-'+str(lc)] = full_agg_series.loc[full_agg_series['Event_descr'] == lc, ['time', 'target', 'year', 'month','period']]
+        if self.min_median_target is None:
+                sample2['pooling'] = ((sample2['size'] < self.min_sample_size)*1).astype(object)
+        else:
+            sample2['pooling'] = (((sample2['size'] < self.min_sample_size) | (sample2['q_50_target'] < self.min_median_target))*1).astype(object)
+
+        lookup_level2_single = sample2.query('pooling == 0')      # singles
+        lookup_level2_singles = lookup_level2_single.drop(columns='pooling', inplace=False)
+        lookup_level2_ag = sample2.query('pooling == 1')        # aggregate
+        lookup_level2_agg = lookup_level2_ag.drop(columns='pooling', inplace=False)
+
+        # Append to already existing dictionary:
+        #-----------------------------------------
+        level_wise_aggr = {}
+        for _, ts_info in lookup_level2_singles.iterrows():
+                combi = tuple(ts_info[:len(['Event_descr'])])
+                ts_slice_grouped = gr2b.get_group(combi[0])
+                ts_slice = ts_slice_grouped.set_index('time', inplace=False)['target'].reset_index()
+
+                # Format dates from 'YYYY-period' to 'YYYY-MM-01'
+                # needed so asfreq can recognize it as date index:
+                ts_slice['period'] = ts_slice['time'].apply(lambda x: x[5:]).astype(int)
+                ts_slice['year'] = ts_slice['time'].apply(lambda x: x[:4]).astype(int)
+
+                if self.periodicity == 52: 
+                        ts_slice['year_period_ts'] = ts_slice.apply(lambda row: self._year_week(row.year, row.period), axis=1)            
+                if self.periodicity == 12:
+                        ts_slice['year_period_ts'] = ts_slice.apply(lambda row: self._convert2date(row.year, row.period), axis=1)
+
+                ts_slice['month'] = [x.month for x in ts_slice['year_period_ts'].tolist()]
+                ts_bag['-'.join(combi)] = ts_slice[['time', self.target_col, 'year', 'month','period']]
+                #print('Level 2')
+                #print("Sample size {}".format(ts_bag['-'.join(combi)].shape))
+
+        # Next take the left-overs (having too short time series) 
+        # and aggregate further -> level 3
+        #----------------------------------------------------------
+        #data_lev3 = data_lev2.merge(lookup_level2_agg[aggreg_dimensions2], how='right', left_on=aggreg_dimensions2, right_on=aggreg_dimensions2)
+        if self.verbose: print("Number of left over aggregations ('Level 2'):", lookup_level2_agg.shape[0])
+
+        ##################################################
+        # Final Level
+        ##################################################
 
         # Finally do a full aggregation over ALL dimensions:
         #----------------------------------------------------

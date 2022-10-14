@@ -166,11 +166,12 @@ def iqr(x):
 
 aggreg_level = 'all_combi'
 ignore_lag = 1 
-min_sample_size = 20
-min_median_target = None 
+min_sample_size = 100
+min_median_target = 30 
 verbose = True
 aggreg_dimensions = ['Lob','Event_descr']
 target_col = "target"
+
 
 # Overwrite I/O yaml spec. if user arguments are given:
 #--------------------------------------------------------
@@ -352,31 +353,99 @@ data_lev2 = data_lev1.merge(lookup_level1_agg[aggreg_dimensions1], how='right', 
 data_lev2.shape
 
 
-# NO level 2 needed here, only two dimensions...
+data_lev2.head(20)
 
-# Finally do a an aggregation over only Event descr.:
+# for k,v in ts_bag.items():
+#     print(v.shape)
+
+############################################################################################################################
+
+aggreg_dimensions1.remove('Lob')
+aggreg_dimensions2 = aggreg_dimensions1.copy()
+
+gr2 = data_lev2.groupby(['Event_descr']+['time'])
+
+#gr3 = data_lev3.groupby(aggreg_dimensions3+['time'])
+data_lev2_new = gr2.agg(target = (target_col, agg_func)).reset_index()     # aggregate
+agg_func
+
+# Check cluster size again for filtering:
+#-------------------------------------------
+gr2b = data_lev2_new.groupby(['Event_descr'])
+#gr3b = data_lev3_new.groupby(aggreg_dimensions3)
+
+sample2 = gr2b.agg(size=(target_col,'count'), q_50_target=(target_col, q_50)).reset_index()
+
+if min_median_target is None:
+    sample2['pooling'] = ((sample2['size'] < min_sample_size)*1).astype(object)
+else:
+    sample2['pooling'] = (((sample2['size'] < min_sample_size) | (sample2['q_50_target'] < min_median_target))*1).astype(object)
+
+lookup_level2_single = sample2.query('pooling == 0')      # singles
+lookup_level2_singles = lookup_level2_single.drop(columns='pooling', inplace=False)
+lookup_level2_ag = sample2.query('pooling == 1')        # aggregate
+lookup_level2_agg = lookup_level2_ag.drop(columns='pooling', inplace=False)
+lookup_level2_singles.head()
+
+# aggr_after_lev2 = data_lev2.merge(lookup_level2_singles, how='right', left_on=['Event_descr'], right_on=['Event_descr']) 
+# #aggr_after_lev2 = data_lev3.merge(lookup_level3_singles, how='right', left_on=aggreg_dimensions3, right_on=aggreg_dimensions3) 
+# aggr_after_lev2.head()
+
+# # Get all corresponding combinations to loop over next,
+# # Based on singles in level3
+# #-------------------------------------------------------
+# gr2 = aggr_after_lev2.groupby(['Lob','Event_descr'])
+# data_lev3 = gr2.agg(size4 = (target_col,'count')).reset_index()     # aggregate
+
+# Append to already existing dictionary:
+#-----------------------------------------
+level_wise_aggr = {}
+for _, ts_info in lookup_level2_singles.iterrows():
+        combi = tuple(ts_info[:len(['Event_descr'])])
+        ts_slice_grouped = gr2b.get_group(combi[0])
+        ts_slice = ts_slice_grouped.set_index('time', inplace=False)['target'].reset_index()
+
+        # Format dates from 'YYYY-period' to 'YYYY-MM-01'
+        # needed so asfreq can recognize it as date index:
+        ts_slice['period'] = ts_slice['time'].apply(lambda x: x[5:]).astype(int)
+        ts_slice['year'] = ts_slice['time'].apply(lambda x: x[:4]).astype(int)
+
+        if periodicity == 52: 
+                ts_slice['year_period_ts'] = ts_slice.apply(lambda row: _year_week(row.year, row.period), axis=1)            
+        if periodicity == 12:
+                ts_slice['year_period_ts'] = ts_slice.apply(lambda row: _convert2date(row.year, row.period), axis=1)
+
+        ts_slice['month'] = [x.month for x in ts_slice['year_period_ts'].tolist()]
+        ts_bag['-'.join(combi)] = ts_slice[['time', target_col, 'year', 'month','period']]
+
+for k,v in ts_bag.items():
+    print(v.shape)
+
+########################################################################################################################
+
+# Finally do an aggregation over only Event descr.:
 #-----------------------------------------------------
-gr_full0 = df.groupby(['Event_descr']+['time'])
+# gr_full0 = df.groupby(['Event_descr']+['time'])
 
-full_agg_series = gr_full0.agg(target = (ts_col, agg_func)).reset_index()
-full_agg_series['year'] = full_agg_series['time'].apply(lambda x: x[:4]).astype(int)
-full_agg_series['period'] = full_agg_series['time'].apply(lambda x: x[5:]).astype(int)
+# full_agg_series = gr_full0.agg(target = (ts_col, agg_func)).reset_index()
+# full_agg_series['year'] = full_agg_series['time'].apply(lambda x: x[:4]).astype(int)
+# full_agg_series['period'] = full_agg_series['time'].apply(lambda x: x[5:]).astype(int)
 
-if periodicity == 52: 
-        full_agg_series['year_period_ts'] = full_agg_series.apply(lambda row: _year_week(row.year, row.period), axis=1)
-        full_agg_series['month'] = [x.month for x in full_agg_series['year_period_ts'].tolist()]
-        for lc in full_agg_series['Event_descr'].unique():
-            ts_bag['all-'+str(lc)] = full_agg_series.loc[full_agg_series['Event_descr'] == lc, ['time', 'target', 'year', 'month','period']]
+# if periodicity == 52: 
+#         full_agg_series['year_period_ts'] = full_agg_series.apply(lambda row: _year_week(row.year, row.period), axis=1)
+#         full_agg_series['month'] = [x.month for x in full_agg_series['year_period_ts'].tolist()]
+#         for lc in full_agg_series['Event_descr'].unique():
+#             ts_bag['all-'+str(lc)] = full_agg_series.loc[full_agg_series['Event_descr'] == lc, ['time', 'target', 'year', 'month','period']]
 
-if periodicity == 12:
-        full_agg_series['year_period_ts'] = full_agg_series.apply(lambda row: _convert2date(row.year, row.period), axis=1)
-        for lc in full_agg_series['Event_descr'].unique():
-                ts_slice0 = full_agg_series.loc[full_agg_series['Event_descr'] == lc, ['year_period_ts', 'target']].set_index('year_period_ts', inplace=False)
-                ts_slice = ts_slice0.asfreq(freq = 'MS', fill_value = 0.).reset_index().rename(columns={'year_period_ts' : 'time'})
-                ts_slice['year'] = pd.DatetimeIndex(ts_slice['time']).year
-                ts_slice['month'] = pd.DatetimeIndex(ts_slice['time']).month
-                ts_slice['period'] = ts_slice['month']
-                ts_bag['all-'+str(lc)] = ts_slice
+# if periodicity == 12:
+#         full_agg_series['year_period_ts'] = full_agg_series.apply(lambda row: _convert2date(row.year, row.period), axis=1)
+#         for lc in full_agg_series['Event_descr'].unique():
+#                 ts_slice0 = full_agg_series.loc[full_agg_series['Event_descr'] == lc, ['year_period_ts', 'target']].set_index('year_period_ts', inplace=False)
+#                 ts_slice = ts_slice0.asfreq(freq = 'MS', fill_value = 0.).reset_index().rename(columns={'year_period_ts' : 'time'})
+#                 ts_slice['year'] = pd.DatetimeIndex(ts_slice['time']).year
+#                 ts_slice['month'] = pd.DatetimeIndex(ts_slice['time']).month
+#                 ts_slice['period'] = ts_slice['month']
+#                 ts_bag['all-'+str(lc)] = ts_slice
 
 
 # Finally do a full aggregation over ALL dimensions:
@@ -426,8 +495,6 @@ if periodicity == 52:
 for name, ts in tseries.items():
     ts.index = ts['time']    
     multi_ts[name] = ts[target_col]   
-
-ts
 
 multi_ts = multi_ts.loc[multi_ts.index[:max_period_index+1],:]
 multi_ts.fillna(value=0, inplace=True)   # replace missings by zeros!

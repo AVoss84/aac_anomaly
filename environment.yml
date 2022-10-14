@@ -8,7 +8,7 @@ dependencies:
   - pip:
   #  # for regular pip packages
     - matplotlib==3.5.2
-    - streamlit==1.0
+    - streamlit==1.0   # 1.13
     - importlib  
     - adtk==0.5.5
     - DateTime==4.3

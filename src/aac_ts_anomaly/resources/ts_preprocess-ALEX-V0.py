@@ -166,8 +166,6 @@ def q_50(x):
 
 df.head()
 
-aggreg_dimensions
-
 # Deduplicate:
 #----------------------
 gr0 = df.groupby(['Lob','event_descr','time'])
@@ -176,7 +174,7 @@ data_lev1 = gr0.agg(target = ('target','sum')).reset_index()
 #counts_lev1[counts_lev1.counts > 1]
 data_lev1.shape
 
-min_sample_size = 20
+min_sample_size = 100
 min_median_cnts = 30
 
 ts_bag = {}

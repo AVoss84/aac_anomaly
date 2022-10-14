@@ -86,21 +86,21 @@ outlier_filter
 
 # Instantiate class:
 #--------------------
-# claims = preprocessor.claims_reporting(periodicity=periodicity)
+claims = preprocessor.claims_reporting(periodicity=periodicity)
 
-# aggreg_level, pre_filter, ignore_lag, min_sample_size, min_median_cnts = list(config_detect['preprocessing'].values())
+#aggreg_level, pre_filter, ignore_lag, min_sample_size, min_median_cnts = list(config_detect['preprocessing'].values())
 
-# gen = claims.process_data(data_orig, aggreg_level = 'all_combi')
+gen = claims.process_data(data_orig, aggreg_level = 'all_combi')
 
-# #get_all = dict(gen)
-# #get_all['all']
+#get_all = dict(gen)
+#get_all['all']
 
 # # Get next series
-# label, sub_set = next(gen)
+label, sub_set = next(gen)
 
-# print(label, sub_set.shape[0])
+print(label, sub_set.shape[0])
 
-# df = deepcopy(sub_set)
+df = deepcopy(sub_set)
 
 # df.head(10)
 # #ts_bag = claims.tseries
@@ -111,6 +111,7 @@ outlier_filter
 #---------------------------------------------------
 
 reload(trainer)
+reload(preprocessor)
 
 train = trainer.trainer(verbose=False)
 
@@ -122,7 +123,7 @@ fitted.anomalies
 y = fitted.val_series
 y.head()
 
-res1, res2_new = train.run_all(data_orig = data_orig, verbose=True, aggreg_level = 'all_combi')
+res1, res2_new = train.run_all(data_orig = data_orig, verbose=True)
 res1.tail()
 res2_new
 

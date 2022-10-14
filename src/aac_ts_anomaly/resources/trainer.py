@@ -64,6 +64,7 @@ class trainer(claims_reporting):
             y_lag = Retrospect(n_steps=2, step_size=1).transform(self.val_series)
             y_lag.dropna(inplace=True)              
             self.val_series = validate_series(y_lag["t-0"] - y_lag["t-1"])   # first differences
+            self.df = self.df.iloc[1: , :]           # drop first row so dimension of orig. dataframe is up-to-date after first diff. 
             
         # No cweek 53 allowed in the following due to the following and other subsequent
         # specifications in time series methods! 
@@ -116,14 +117,17 @@ class trainer(claims_reporting):
         df_out = deepcopy(self.df)    
         df_out.index = df_out['year_period_ts']
         df_out.drop(columns=['year_period_ts'], inplace = True)
-
         self.anomaly_proba.fillna(0, inplace=True)
         det_mask = self.anomaly_proba > self.detect_thresh
         self.anomalies = det_mask*1
         self.outliers = (self.anomalies == 1)
         #df_out['anomalies'] = det_mask*1
         #self.outliers = (df_out['anomalies'] == 1)
-        self.outlier_dates = df_out[self.outliers].time.tolist()
+        if np.any(self.outliers):
+            self.outlier_dates = df_out[self.outliers].time.tolist()
+        else:
+            self.outlier_dates = []
+
         self.nof_outliers = len(self.outlier_dates)
         #self.anomalies = df_out['anomalies']
 
@@ -163,8 +167,6 @@ class trainer(claims_reporting):
         #-----------------------------------------------------
         for i in range(len(self.all_series)):    
             label, sub_set = self.all_series[i]
-            
-            print(sub_set.shape)
 
             # In case of almost constant time series,
             # e.g. only zeros, check if distr. is close to a degenerate distr.
