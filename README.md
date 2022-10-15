@@ -17,3 +17,9 @@ To install the package locally, execute the following steps:
 cd aac_ts_anomaly
 pip install -e src
 ```
+
+Start streamlit application by running:
+
+```bash                                 
+$ streamlit run app.py
+```
