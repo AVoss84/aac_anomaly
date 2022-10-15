@@ -76,56 +76,7 @@ def main():
         st.image(os.path.join(glob.UC_CODE_DIR,'templates','agcs_banner.png'), use_column_width=True)
         # set up file upload:
         uploaded_file = st.file_uploader("Upload file:", type = ["csv"])    # returns byte object
-        #print(uploaded_file)
 
-        # select box for usecase
-        #usecases = ['All', 'Region', 'LoB']
-        #selected_usecase =  st.multiselect("Use case:", usecases)
-
-        #st.info("Select reports and press the download button.")
-
-    # report_explorer = st.container()
-    # with report_explorer:
-    #     #st.markdown("### Report Download Explorer")
-    #     #st.info("Select reports and press the download button.")
-
-    #     # Set target location
-    #     target_location = glob.UC_SAVE_TO  
-
-    #     # Get File List
-    #     target_dir = glob.UC_REPORT_DIR if target_location == 'sftp' else glob.UC_PWEAVE_DIR
-    #     file_list = sorted(gl.glob(target_dir+"*.pdf"), key=os.path.getctime, reverse=True)
-    #     short_list = [filename.replace(target_dir+"claims_anomaly_report_incurred_", "").replace(".pdf", "") for filename in file_list]
-
-    #     # Create Report Select Field
-    #     selected_reports = st.multiselect("Files available for download:", short_list)
-    #     st.markdown("***")
-
-    #     #Create Download Button
-    #     if len(selected_reports) == 1:
-    #         index = short_list.index(selected_reports[0])
-    #         with open(file_list[index], "rb") as file:
-    #             btn = st.download_button(
-    #                 label="File download",
-    #                 data=file,
-    #                 file_name=file.name.replace(target_dir, ""),
-    #                 mime="application/pdf"
-    #             )
-    #     elif len(selected_reports) > 1:
-    #         #Create Report zip
-    #         zip_path = target_dir + "claims_anomaly_reports.zip"
-    #         report_zip = ZipFile(zip_path, "w")
-    #         for report in selected_reports:
-    #             index = short_list.index(report)
-    #             report_zip.write(file_list[index], basename(file_list[index]))
-    #         report_zip.close()
-    #         with open(zip_path, "rb") as file:
-    #             btn = st.download_button(
-    #                 label="Download Reports",
-    #                 data=file,
-    #                 file_name=file.name,
-    #                 mime="application/zip"
-    #             )
 
     data_orig = None
 
