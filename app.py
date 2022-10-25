@@ -78,13 +78,12 @@ def main():
         uploaded_file = st.file_uploader("Upload file:", type = ["csv"])    # returns byte object
 
 
-    data_orig = None
-
+    data_orig, pp, df = None, None, None
     if uploaded_file is not None:
         try:
             #data_orig = pd.read_excel(uploaded_file, sheet_name="data")
             data_orig = pd.read_csv(uploaded_file, delimiter=',')
-            print(data_orig.shape)
+            #print(data_orig.shape)
 
             target_col='target'
 
@@ -93,7 +92,7 @@ def main():
 
             #st.markdown("### Report info")
             with tab_data:
-                dataset = st.expander(label = "Display imported data")
+                dataset = st.expander(label = "Display full dataset")
 
                 #st.dataframe(data_orig.head(100))
                 with dataset:            
@@ -108,7 +107,7 @@ def main():
 
             #get_all = dict(gen)
             #tseries_names = list(get_all.keys())
-            #tseries_values = list(get_all.values())
+            #tseries_values = list(get_all.values()
 
             def widget_callback():
                 """Callback function to retrieve API states from a running streamlit server"""
@@ -116,14 +115,37 @@ def main():
                 #st.session_state.label = tseries_names[st.session_state.indexer]
                 #st.session_state.sub_set = tseries_values[st.session_state.indexer]
 
+
         except Exception as ex:
             st.error("Invalid File")
     
         with st.sidebar:  
                 
+                # Initialize states:
                 if 'indexer' not in st.session_state:
                 	st.session_state.indexer = 0 
-                 
+
+                if 'ts_labels' not in st.session_state: 
+                    st.session_state.ts_labels = ()
+
+                if 'label' not in st.session_state: 
+                    st.session_state.label = None
+
+                if 'val' not in st.session_state: 
+                    st.session_state.val = pd.DataFrame()
+
+                if 'level_wise_aggr' not in st.session_state: 
+                    st.session_state.level_wise_aggr = {}
+                    
+                if 'filt_suspects_plot' not in st.session_state: 
+                    st.session_state.filt_suspects_plot = {}
+
+                if 'new_anomalies' not in st.session_state: 
+                    st.session_state.new_anomalies = []
+
+                if 'filt_suspects_values' not in st.session_state: 
+                    st.session_state.filt_suspects_values = {}
+
                 # if 'label' not in st.session_state:
                 # 	st.session_state.label = tseries_names[0]
 
@@ -137,42 +159,131 @@ def main():
         with st.sidebar:
 
             #submitted = st.button('Run analysis', key='my_button', on_click = widget_callback)    # boolean 
-            submitted = st.button('Run analysis', key='train')    # no callback needed here
             
-        if submitted:
-            train0 = trainer.trainer(verbose=False)
+            if st.button('Run analysis', key='train'):    # no callback needed here
 
-            results_all, results_new = train0.run_all(data_orig = data_orig, verbose=False)   # write_table = False
+                #with st.spinner('Wait for it...'):
+                train0 = trainer.trainer(verbose=False)
 
-            results_final = deepcopy(results_new)      # only show new outliers excluding ones shown before
-            #results_final = deepcopy(results_all)      # show all detected outliers potentially including ones shown before
+                results_all, results_new = train0.run_all(data_orig = data_orig, verbose=False)   # write_table = False
 
-            results = deepcopy(results_final)
-            results.rename(columns={'time_anomaly': 'Time', 'time_series_name': 'Time series', 'target': 'Claim counts'}, inplace=True)
-            results.reset_index(inplace=True, drop=True)
+                results_final = deepcopy(results_new)      # only show new outliers excluding ones shown before
+                #results_final = deepcopy(results_all)      # show all detected outliers potentially including ones shown before
 
-            all_series = train0.all_series
-            new_anomalies = list(set(results_final['time_series_name']))
-            
-            try:
-                where = np.where(np.array(train0.time_index) == outlier_filter)[0][0]
-                outlier_search_list = train0.time_index[where:]
-            except Exception as ex:
-                outlier_search_list = []
+                results = deepcopy(results_final)
+                results.rename(columns={'time_anomaly': 'Time', 'time_series_name': 'Time series', 'target': 'Claim counts'}, inplace=True)
+                results.reset_index(inplace=True, drop=True)
 
-            with tab_data:
+                all_series = train0.all_series
+                new_anomalies = list(set(results_final['time_series_name']))
+                st.session_state.new_anomalies = new_anomalies
+
+                st.session_state.filt_suspects_values = train0.filt_suspects_values
+                st.session_state.filt_suspects_plot = train0.filt_suspects_plot 
+                st.session_state.ts_labels = tuple(train0.filt_suspects_plot.keys())
+                st.session_state.level_wise_aggr = train0.level_wise_aggr
+                
+                try:
+                    where = np.where(np.array(train0.time_index) == outlier_filter)[0][0]
+                    outlier_search_list = train0.time_index[where:]
+                except Exception as ex:
+                    outlier_search_list = []
+
+                #with tab_data:
                 st.success("Training done!")
+                st.info(f"{len(all_series)} time series analyzed")
 
-            #st.info(f"Training done!")
-            st.balloons()
+                st.balloons()
+            
 
-            print(tuple(train0.filt_suspects_plot.keys()))
+            #---------------------------------------------------------------------------------------
+            st.markdown("***")
 
-            with st.sidebar: 
-                # Add callback dependency!!!
-                option = st.selectbox('Select anomaly:', tuple(train0.filt_suspects_plot.keys()))
+            label = st.selectbox('Select anomaly:', st.session_state.ts_labels)
 
-                st.write('You selected:', option)
+            #st.write('You selected:', label)
+
+            st.session_state.label = label
+            
+            if st.session_state.label is not None:
+                st.session_state.val = st.session_state.filt_suspects_plot[label]
+
+            #print('Here:',st.session_state.label)
+
+            #submitted_plot = st.button('Plot selected', key='plot_anom')   
+            #if submitted_plot:
+
+            with tab_data: 
+                dataset_sub = st.expander(label = "Display selected data")
+
+
+            if label in st.session_state.new_anomalies:
+                    
+                    fitted_val_series = st.session_state.val['val_series']
+                    y = fitted_val_series
+                    fitted_anomalies = st.session_state.val['anom_flag']
+                    anomaly_proba = st.session_state.val['anom_evidence']           # anomaly probabilities
+
+                    filtered_outliers = st.session_state.filt_suspects_values[label]['anomaly_dates']
+                    sub_set = st.session_state.filt_suspects_plot[label]['df']
+                    df = deepcopy(sub_set)
+
+                    #-----------------------------------------------------------------------------
+                    inside = ''    
+                    if label in list(st.session_state.level_wise_aggr.keys()):
+                        inside = st.session_state.level_wise_aggr[label]       # then shows over which set it was aggregated    
+
+                        main = label +':\n\n '+ str(len(filtered_outliers)) + \
+                                ' outlier(s) detected!\n' + 'Occured at year-period(s): '+ \
+                                ', '.join(filtered_outliers)+'\n'+'\nAggregated over: '
+                        for i in inside: main += str(i)+'\n'
+
+                    else:
+                        main = 'Plot 1: '+label +':\n\n '+ str(len(filtered_outliers)) + \
+                            ' outlier(s) detected!\n' + 'Occured at year-period(s): '+ \
+                            ', '.join(filtered_outliers)+'\n'
+                    #------------------------------------------------------------------------------
+                    pp = plot(fitted_val_series, anomaly_true = fitted_anomalies, ts_linewidth=2, ts_markersize=6, 
+                        at_markersize=5, at_color='red', freq_as_period=False, ts_alpha=0.8, at_alpha=0.5, 
+                        title = main)
+
+                #st.success('Reports created!')
+                    with tab_data: 
+                        #st.info(f"Selected series (T = {sub_set.shape[0]}): {label}")
+                        dataset_sub = st.expander(label = "Display selected data")
+
+                        with dataset_sub:            
+                            df1 = df.rename(columns={'month': 'Month', 'time': 'Time', target_col : 'Target'}, inplace=False) 
+                            st.table(df1[['Time', 'Month','Target']])
+
+                    #st.balloons()
+                
+            with tab_plots:
+                    st.info(f"Series: {st.session_state.label}")
+                    if pp: st.pyplot(pp.figure)   # make above output fig
+
+            with tab_plots_season:
+                st.info(f"Series: {st.session_state.label}")
+
+                # Draw Boxplot
+                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(15,6), dpi= 80)
+                if df is not None:
+                    sns.boxplot(x='year', y='target', data=df, ax=axes[0])
+                    sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="counts")
+                    if periodicity == 52 :
+                        sns.boxplot(x='period', y='target', data=df, ax=axes[2], orient='v').set(
+                        xlabel='week', ylabel="counts")
+                #------------------------------------------------------------------------------------------
+                # Set Titles
+                axes[0].set_title('Yearly box plots\n(Trend)', fontsize=18) 
+                axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=18)
+                if periodicity == 52 :
+                    axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=18)
+                #plt.yticks(rotation=15)
+                plt.xticks(rotation=45)
+                #plt.show()
+                st.pyplot(fig)
+
 
             ################### ANOMALY DETECTION ####################################    
             

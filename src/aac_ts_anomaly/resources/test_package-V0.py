@@ -123,10 +123,32 @@ fitted.anomalies
 y = fitted.val_series
 y.head()
 
-res1, res2_new = train.run_all(data_orig = data_orig, verbose=True)
-res1.tail()
-res2_new
+results_all, results_new = train.run_all(data_orig = data_orig, verbose=True)
 
+results_final = deepcopy(results_new)      # only show new outliers excluding ones shown before
+#results_final = deepcopy(results_all)      # show all detected outliers potentially including ones shown before
+
+results = deepcopy(results_final)
+results.rename(columns={'time_anomaly': 'Time', 'time_series_name': 'Time series', 'target': 'Claim counts'}, inplace=True)
+results.reset_index(inplace=True, drop=True)
+
+all_series = train.all_series
+
+len(all_series)
+
+new_anomalies = list(set(results_final['time_series_name']))
+new_anomalies
+
+type(train.filt_suspects_plot)
+
+val = train.filt_suspects_plot['Transport-Camping']
+
+val.keys()
+
+fitted_val_series = val['val_series']
+
+train.filt_suspects_values
+train.level_wise_aggr
 
 # Create plots as in JUypter notebook....
 ###############################################################################
