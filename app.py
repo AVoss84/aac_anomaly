@@ -268,3 +268,4 @@ def main():
 ###########
 main()
 
+# Next ToDos: add Dockerfile! Then deploy to AWS! 
