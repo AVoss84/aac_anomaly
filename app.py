@@ -3,17 +3,9 @@ import pandas as pd
 import numpy as np
 import base64
 import glob as gl
-#from zipfile import ZipFile
-#from os.path import basename
 from PIL import Image
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-from aac_ts_anomaly.utils import tsa_utils as tsa
-from aac_ts_anomaly.utils import utils_func as util
-from aac_ts_anomaly.config import global_config as glob
-from aac_ts_anomaly.services import file
-from aac_ts_anomaly.resources import (config, preprocessor, trainer)
-
 import os, warnings
 warnings.filterwarnings("ignore")
 import matplotlib as mpl
@@ -28,17 +20,21 @@ import adtk
 from adtk.visualization import plot
 import statsmodels.api as sm
 
+from aac_ts_anomaly.utils import tsa_utils as tsa
+from aac_ts_anomaly.utils import utils_func as util
+from aac_ts_anomaly.config import global_config as glob
+from aac_ts_anomaly.services import file
+from aac_ts_anomaly.resources import (config, preprocessor, trainer)
 
 # Set Page name and icon, Layout and sidebar expanded
 img = Image.open(os.path.join(glob.UC_CODE_DIR,'templates','allianz_logo.jpg'))
 st.set_page_config(page_title='Anomaly Report Creator', page_icon=img, layout="wide", initial_sidebar_state='expanded')
-
-
+#----------------------------------------------------------------------------------------------------------------------
 periodicity = 52
 anomaly_history = pd.DataFrame(columns=['time_anomaly', 'time_series_name', 'clm_cnt'])
 config_detect = config.in_out52['detection']
 outlier_filter = config_detect['training']['outlier_filter']
-
+#--------------------------------------------------------------------------------------------------------
 age = 6
 if outlier_filter is None:
         six_months_ago = date.today() - relativedelta(months=age)
@@ -68,10 +64,6 @@ def main():
         tab_plots = tabs[1]
         tab_plots_season = tabs[2]
 
-        # Title of app
-        #st.title("Anomaly Report Creator")
-        #st.markdown("***")
-
     with st.sidebar:
         st.image(os.path.join(glob.UC_CODE_DIR,'templates','agcs_banner.png'), use_column_width=True)
         # set up file upload:
@@ -86,14 +78,11 @@ def main():
             #print(data_orig.shape)
 
             target_col='target'
-
             data_orig.rename(columns={'lob': 'Lob', 'erartbez': 'Event_descr', 'time_index': 'time', 'clm_cnt' : target_col}, inplace=True) 
             data_orig = data_orig[['time', 'Lob', 'Event_descr', target_col]]
 
-            #st.markdown("### Report info")
             with tab_data:
                 dataset = st.expander(label = "Display full dataset")
-
                 #st.dataframe(data_orig.head(100))
                 with dataset:            
                     df0 = data_orig.rename(columns={'time': 'Time', target_col : 'Target'}, inplace=False)  # only for nicer displays
@@ -114,7 +103,6 @@ def main():
                 st.session_state.indexer += 1
                 #st.session_state.label = tseries_names[st.session_state.indexer]
                 #st.session_state.sub_set = tseries_values[st.session_state.indexer]
-
 
         except Exception as ex:
             st.error("Invalid File")
@@ -157,12 +145,11 @@ def main():
 
         # Only create button, if valid file is uploaded
         with st.sidebar:
-
             #submitted = st.button('Run analysis', key='my_button', on_click = widget_callback)    # boolean 
             
             if st.button('Run analysis', key='train'):    # no callback needed here
 
-                #with st.spinner('Wait for it...'):
+                ################### ANOMALY DETECTION #################################### 
                 train0 = trainer.trainer(verbose=False)
 
                 results_all, results_new = train0.run_all(data_orig = data_orig, verbose=False)   # write_table = False
@@ -189,7 +176,6 @@ def main():
                 except Exception as ex:
                     outlier_search_list = []
 
-                #with tab_data:
                 st.success("Training done!")
                 st.info(f"{len(all_series)} time series analyzed")
 
@@ -200,7 +186,6 @@ def main():
             st.markdown("***")
 
             label = st.selectbox('Select anomaly:', st.session_state.ts_labels)
-
             #st.write('You selected:', label)
 
             st.session_state.label = label
@@ -208,14 +193,8 @@ def main():
             if st.session_state.label is not None:
                 st.session_state.val = st.session_state.filt_suspects_plot[label]
 
-            #print('Here:',st.session_state.label)
-
-            #submitted_plot = st.button('Plot selected', key='plot_anom')   
-            #if submitted_plot:
-
             with tab_data: 
                 dataset_sub = st.expander(label = "Display selected data")
-
 
             if label in st.session_state.new_anomalies:
                     
@@ -239,15 +218,15 @@ def main():
                         for i in inside: main += str(i)+'\n'
 
                     else:
-                        main = 'Plot 1: '+label +':\n\n '+ str(len(filtered_outliers)) + \
+                        main = label +'\n\n '+ str(len(filtered_outliers)) + \
                             ' outlier(s) detected!\n' + 'Occured at year-period(s): '+ \
                             ', '.join(filtered_outliers)+'\n'
+
                     #------------------------------------------------------------------------------
                     pp = plot(fitted_val_series, anomaly_true = fitted_anomalies, ts_linewidth=2, ts_markersize=6, 
                         at_markersize=5, at_color='red', freq_as_period=False, ts_alpha=0.8, at_alpha=0.5, 
                         title = main)
 
-                #st.success('Reports created!')
                     with tab_data: 
                         #st.info(f"Selected series (T = {sub_set.shape[0]}): {label}")
                         dataset_sub = st.expander(label = "Display selected data")
@@ -256,17 +235,16 @@ def main():
                             df1 = df.rename(columns={'month': 'Month', 'time': 'Time', target_col : 'Target'}, inplace=False) 
                             st.table(df1[['Time', 'Month','Target']])
 
-                    #st.balloons()
-                
+            #----------------------------------------------------------------------------------
             with tab_plots:
-                    st.info(f"Series: {st.session_state.label}")
-                    if pp: st.pyplot(pp.figure)   # make above output fig
+                    #st.info(f"Series: {st.session_state.label}")
+                    if pp is not None: st.pyplot(pp.figure)   # make above output fig
 
             with tab_plots_season:
                 st.info(f"Series: {st.session_state.label}")
 
                 # Draw Boxplot
-                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(15,6), dpi= 80)
+                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(15,6), dpi= 60)
                 if df is not None:
                     sns.boxplot(x='year', y='target', data=df, ax=axes[0])
                     sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="counts")
@@ -275,114 +253,14 @@ def main():
                         xlabel='week', ylabel="counts")
                 #------------------------------------------------------------------------------------------
                 # Set Titles
-                axes[0].set_title('Yearly box plots\n(Trend)', fontsize=18) 
-                axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=18)
-                if periodicity == 52 :
-                    axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=18)
+                axes[0].set_title('Yearly box plots\n(Trend)', fontsize=12) 
+                axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=12)
+                if periodicity == 52 : axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=12)
                 #plt.yticks(rotation=15)
                 plt.xticks(rotation=45)
                 #plt.show()
-                st.pyplot(fig)
-
-
-            ################### ANOMALY DETECTION ####################################    
+                st.pyplot(fig)   
             
-            # # Get next series
-            # #-------------------
-            # if submitted:
-                
-            #     st.write(f'Series = {st.session_state.indexer} (of {len(tseries_names)})')
-
-            #     #label, sub_set = next(gen)
-            #     label, sub_set = st.session_state.label, st.session_state.sub_set
-            #     print('Claims from period {} to {}.'.format(claims.min_year_period, claims.max_year_period)) 
-
-            #     print(label, sub_set.shape[0])
-            #     df = deepcopy(sub_set)
-                
-            #     # Next do it like in the report
-            #     # Run all and then just index over results -> faster!!!
-            #     ##### !!!!!!!!!!!!!!!!!!!!!
-
-
-            #     train = trainer.trainer(verbose=False)
-            #     fitted = train.fit(df = df)
-
-            #     y = fitted.ts_values
-            #     #y = fitted.val_series
-            #     out = fitted.predict(detect_thresh = None)
-
-            #     where = np.where(np.array(claims.time_index) == outlier_filter)[0][0]
-            #     outlier_search_list = claims.time_index[where:]
-
-            #     filtered_outliers = []
-            #     if out.nof_outliers > 0:
-            #         outlier_dates = out.outlier_dates
-            #         filt = [outl in outlier_search_list for outl in outlier_dates]
-            #         filtered_outliers = np.array(outlier_dates)[filt].tolist()
-                    
-            #         if len(filtered_outliers) > 0:
-            #             #print("\nSeries",i)
-            #             #print(label, sub_set.shape[0])
-            #             print("Anomaly found!")
-            #             print(filtered_outliers)
-
-            #     # Detect anomalies:
-            #     #----------------------
-            #     inside = ''    
-            #     if label in list(claims.level_wise_aggr.keys()):
-
-            #         inside = claims.level_wise_aggr[label]       # then shows over which set it was aggregated    
-                    
-            #         main = label +':\n\n '+ str(len(filtered_outliers)) + \
-            #                 ' outlier(s) detected!\n' + 'Occured at year-period(s): '+ \
-            #                 ', '.join(filtered_outliers)+'\n'+'\nAggregated over: '
-            #         for i in inside: main += str(i)+'\n'
-                    
-            #     else:
-            #         main = label +':\n\n '+ str(len(filtered_outliers)) + \
-            #             ' outlier(s) detected!\n' + 'Occured at year-period(s): '+ \
-            #             ', '.join(filtered_outliers)+'\n'
-
-            #     pp = plot(fitted.val_series, anomaly_true = fitted.anomalies, ts_linewidth=1.2, ts_markersize=6, 
-            #         at_markersize=5, at_color='red', freq_as_period=False, ts_alpha=0.8, at_alpha=0.5, title = main)
-
-            #     #st.success('Reports created!')
-            #     with tab_data: 
-            #         st.info(f"Series: {label}  (T: {sub_set.shape[0]})")
-            #         dataset_sub = st.expander(label = "Display training data")
-
-            #         with dataset_sub:            
-            #             df1 = df.rename(columns={'month': 'Month', 'time': 'Time', target_col : 'Target'}, inplace=False) 
-            #             st.table(df1[['Time', 'Month','Target']])
-
-            #     #st.balloons()
-
-            #     with tab_plots:
-            #             st.info(f"Label: {st.session_state.label}")
-            #             st.pyplot(pp.figure)   # make above output fig
-
-            #     with tab_plots_season:
-            #         st.info(f"Label: {st.session_state.label}")
-
-            #         # Draw Boxplot
-            #         fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(15,6), dpi= 80)
-    
-            #         sns.boxplot(x='year', y='target', data=df, ax=axes[0])
-            #         sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="counts")
-            #         if periodicity == 52 :
-            #             sns.boxplot(x='period', y='target', data=df, ax=axes[2], orient='v').set(
-            #             xlabel='week', ylabel="counts")
-            #         #------------------------------------------------------------------------------------------
-            #         # Set Titles
-            #         axes[0].set_title('Yearly box plots\n(Trend)', fontsize=18) 
-            #         axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=18)
-            #         if periodicity == 52 :
-            #             axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=18)
-            #         #plt.yticks(rotation=15)
-            #         plt.xticks(rotation=45)
-            #         #plt.show()
-            #         st.pyplot(fig)
 
  
 ###########
