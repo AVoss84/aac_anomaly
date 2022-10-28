@@ -23,3 +23,10 @@ Start streamlit application by running:
 ```bash                                 
 bash run_app_locally.sh 
 ```
+
+Build image and start container:
+```bash                                 
+docker-compose up -d 
+```
+
+ 
