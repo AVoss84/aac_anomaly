@@ -6,8 +6,8 @@ from pathlib import Path
 #-------------------------------
 
 #using = 'local'                # Jupyter server
-using = 'vm'                   # own virtual machine
-#using = 'docker'                # Docker container
+#using = 'vm'                   # own virtual machine
+using = 'docker'                # Docker container
 
 
 ## Check if required environment variables exist
@@ -28,7 +28,7 @@ elif using == 'docker':
     defaults = {
             "UC_CODE_DIR": "/app/src/",                 
             "UC_DATA_DIR": "/app/data/",         
-            "UC_DATA_PKG_DIR": "/app/data/",    # data folder within package
+            "UC_DATA_PKG_DIR": "/app/src/aac_ts_anomaly/data/",    # data folder within package
             #"UC_REPORT_DIR": "/data/submission/report/",            # SFTP output 
             #"UC_REPORT_DIR": "/app/src/pweave/",           
             #"UC_DB_CONNECTION": 'postgresql://postgres:kakYritiven@agcs-postgres-1-server.service.dsp.allianz/prod',
