@@ -21,5 +21,5 @@ pip install -e src
 Start streamlit application by running:
 
 ```bash                                 
-$ bash run_app_locally.sh 
+bash run_app_locally.sh 
 ```
