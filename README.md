@@ -8,13 +8,16 @@ An ensemble of different time series anomaly detection methods is being construc
 ### Create conda environment with require packages installed
 
 ```bash
-conda env create -f environment.yml
+#conda env create -f environment.yml   # optionally
+conda create -n env_tsanomaly
+conda activate env_tsanomaly
 ```
 
 To install the package locally, execute the following steps:
 
 ```bash
 cd aac_ts_anomaly
+pip install -r requirements.txt         # in case no environment.yml was used
 pip install -e src
 ```
 
