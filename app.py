@@ -6,7 +6,7 @@ import glob as gl
 from PIL import Image
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-import os, warnings
+import os, warnings, adtk
 warnings.filterwarnings("ignore")
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -16,7 +16,6 @@ import seaborn as sns
 #from statsmodels.graphics.tsaplots import plot_acf, plot_pacf, month_plot, quarter_plot
 from copy import deepcopy
 from importlib import reload
-import adtk
 from adtk.visualization import plot
 import statsmodels.api as sm
 
@@ -43,9 +42,7 @@ if outlier_filter is None:
 
 # Use pickle file as substitute for Postgres:
 # pkl = file.PickleService(path = "anomaly_history.pkl")
-
 # pkl.doWrite(anomaly_history)
-
 # pkl.doRead()
 
 
@@ -75,7 +72,6 @@ def main():
         try:
             #data_orig = pd.read_excel(uploaded_file, sheet_name="data")
             data_orig = pd.read_csv(uploaded_file, delimiter=',')
-            #print(data_orig.shape)
 
             target_col='target'
             data_orig.rename(columns={'lob': 'Lob', 'erartbez': 'Event_descr', 'time_index': 'time', 'clm_cnt' : target_col}, inplace=True) 
@@ -89,26 +85,16 @@ def main():
                     st.table(df0.head(100))
                     st.success(uploaded_file.name + ' successfully uploaded!')
 
-            # Instantiate class:
-            #--------------------
-            #claims = preprocessor.claims_reporting(periodicity=periodicity)
-            #gen = claims.process_data(data_orig, aggreg_level = 'all_combi')
-
-            #get_all = dict(gen)
-            #tseries_names = list(get_all.keys())
-            #tseries_values = list(get_all.values()
-
-            def widget_callback():
-                """Callback function to retrieve API states from a running streamlit server"""
-                st.session_state.indexer += 1
-                #st.session_state.label = tseries_names[st.session_state.indexer]
-                #st.session_state.sub_set = tseries_values[st.session_state.indexer]
+            # def widget_callback():
+            #     """Callback function to retrieve API states from a running streamlit server"""
+            #     st.session_state.indexer += 1
+            #     #st.session_state.label = tseries_names[st.session_state.indexer]
+            #     #st.session_state.sub_set = tseries_values[st.session_state.indexer]
 
         except Exception as ex:
             st.error("Invalid File")
     
         with st.sidebar:  
-                
                 # Initialize states:
                 if 'indexer' not in st.session_state:
                 	st.session_state.indexer = 0 
@@ -156,7 +142,6 @@ def main():
 
                 results_final = deepcopy(results_new)      # only show new outliers excluding ones shown before
                 #results_final = deepcopy(results_all)      # show all detected outliers potentially including ones shown before
-
                 results = deepcopy(results_final)
                 results.rename(columns={'time_anomaly': 'Time', 'time_series_name': 'Time series', 'target': 'Claim counts'}, inplace=True)
                 results.reset_index(inplace=True, drop=True)
@@ -179,15 +164,14 @@ def main():
                 st.success("Training done!")
                 st.info(f"{len(all_series)} time series analyzed")
 
-                st.balloons()
+                #st.balloons()
             
-
             #---------------------------------------------------------------------------------------
-            st.markdown("***")
+            #st.markdown("***")
+            st.text(" ")
 
             label = st.selectbox('Select anomaly:', st.session_state.ts_labels)
             #st.write('You selected:', label)
-
             st.session_state.label = label
             
             if st.session_state.label is not None:
@@ -262,7 +246,6 @@ def main():
                 st.pyplot(fig)   
             
 
- 
 ###########
 # Run app:
 ###########

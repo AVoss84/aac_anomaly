@@ -150,6 +150,9 @@ fitted_val_series = val['val_series']
 train.filt_suspects_values
 train.level_wise_aggr
 
+fitted.val_series, anomaly_true = fitted.anomalies
+
+
 # Create plots as in JUypter notebook....
 ###############################################################################
 
