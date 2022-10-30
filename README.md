@@ -15,7 +15,6 @@ conda activate env_tsanomaly
 To install the package locally, execute the following steps:
 
 ```bash
-cd aac_ts_anomaly
 pip install -r requirements.txt         # in case no environment.yml was used
 pip install -e src
 ```
