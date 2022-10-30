@@ -9,7 +9,6 @@ from pathlib import Path
 #using = 'vm'                   # own virtual machine
 using = 'docker'                # Docker container
 
-
 ## Check if required environment variables exist
 ## if not apply default paths from test environment:
 #-----------------------------------------------------------
@@ -17,7 +16,7 @@ if using == 'vm':
     defaults = {
             "UC_CODE_DIR": str(Path.home() / "Documents/GitHub/aac_anomaly/src"),       
             "UC_DATA_DIR": str(Path.home() / "Documents/Arbeit/Allianz/AZVers/data"),                      
-            #"UC_REPORT_DIR": "/data/data/submission/report/",            # SFTP output 
+            #"UC_REPORT_DIR": "/data/data/submission/report/",           
             "UC_DATA_PKG_DIR": str(Path.home() / "Documents/GitHub/aac_anomaly/src/aac_ts_anomaly/data/"),    # data folder within package
             #"UC_DB_CONNECTION": 'postgresql://postgres:kakYritiven@agcs-postgres-1-server.service.dsp.allianz/prod',
             "UC_SAVE_TO" : "local",  #"sftp"   local means save to pweave package folder  
@@ -29,7 +28,7 @@ elif using == 'docker':
             "UC_CODE_DIR": "/app/src/",                 
             "UC_DATA_DIR": "/app/data/",         
             "UC_DATA_PKG_DIR": "/app/src/aac_ts_anomaly/data/",    # data folder within package
-            #"UC_REPORT_DIR": "/data/submission/report/",            # SFTP output 
+            #"UC_REPORT_DIR": "/data/submission/report/",            
             #"UC_REPORT_DIR": "/app/src/pweave/",           
             #"UC_DB_CONNECTION": 'postgresql://postgres:kakYritiven@agcs-postgres-1-server.service.dsp.allianz/prod',
             "UC_SAVE_TO" : "local",     
@@ -37,7 +36,7 @@ elif using == 'docker':
             "UC_APP_CONNECTION": "0.0.0.0"}      # must be 0.0.0.0 for later deployment instead of 127.0.0.1 only works locally on the VM                
 else:
     defaults = {"UC_CODE_DIR": str(Path.home() / "aac_anomaly_detection/src/"),              # Jupyter
-                "UC_DATA_DIR": str(Path.home() / "data/"),     # SFTP input
+                "UC_DATA_DIR": str(Path.home() / "data/"),     
                 #"UC_REPORT_DIR": "/data/submission/report/",            # SFTP output 
                 "UC_DATA_PKG_DIR": str(Path.home() / "aac_anomaly_detection/src/aac_ts_anomaly/data"),      # data folder within package
                 #"UC_DB_CONNECTION": 'postgresql://postgres:kakYritiven@agcs-postgres-1-server.service.dsp.allianz/prod',
