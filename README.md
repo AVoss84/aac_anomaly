@@ -4,6 +4,7 @@ An ensemble of different time series anomaly detection methods is being construc
 
 <img src= "https://openclipart.org/image/400px/svg_to_png/319677/microscope-retro.png" width="80" />
 
+### Install package and build application 
 
 Create conda environment with required packages 
 ```bash
