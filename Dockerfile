@@ -5,9 +5,8 @@ RUN pip install --upgrade pip
 EXPOSE 5000
 COPY . /app
 RUN pip install -r requirements.txt
-RUN pip install -e src
-# Add config file to target folder
-COPY config.toml /root/.streamlit/config.toml
+RUN pip install src
+COPY config.toml /root/.streamlit/config.toml       # Add config file to target folder
 WORKDIR /app
 ENTRYPOINT [ "streamlit", "run" ]
 CMD [ "app.py" ]
