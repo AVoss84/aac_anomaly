@@ -120,8 +120,8 @@ fitted = train.fit(df = df)
 out = fitted.predict(detect_thresh = None)
 fitted.anomalies
 
-y = fitted.val_series
-y.head()
+# y = fitted.val_series
+# y.head()
 
 results_all, results_new = train.run_all(data_orig = data_orig, verbose=True)
 
@@ -139,248 +139,45 @@ len(all_series)
 new_anomalies = list(set(results_final['time_series_name']))
 new_anomalies
 
-type(train.filt_suspects_plot)
 
-val = train.filt_suspects_plot['Transport-Camping']
+# Change plots to take original series
+# after having used transformed data
+#######################################################################
 
-val.keys()
+from adtk.data import validate_series
+from adtk.transformer import DoubleRollingAggregate, RollingAggregate, Retrospect, ClassicSeasonalDecomposition
+from adtk.pipe import Pipeline, Pipenet
 
-fitted_val_series = val['val_series']
-
-train.filt_suspects_values
-train.level_wise_aggr
-
-fitted.val_series, anomaly_true = fitted.anomalies
-
-
-# Create plots as in JUypter notebook....
-###############################################################################
-
-from adtk.visualization import plot
-import statsmodels.api as sm
-import matplotlib.ticker as ticker
-
-# Get next series
-#-------------------
-label, sub_set = next(gen)
-
-print('Claims from period {} to {}.'.format(claims.min_year_period, claims.max_year_period)) 
-
-print(label, sub_set.shape[0])
-df = deepcopy(sub_set)
+df['year_period_ts'] = df.apply(lambda row: claims._year_week(row.year, row.period), axis=1)
+# Remove calendar week 53 if there! Frequ. = 52 from now on.
+df = claims._correct_cweek_53(df, time_col = 'year_period_ts')
 
 df.head()
 
-train = trainer.trainer(periodicity = periodicity, verbose=False)
+transform = 'diff'
+target_col = "target"
 
-fitted = train.fit(df = df)
-
-y = fitted.ts_values
-#y = fitted.val_series
-out = fitted.predict(detect_thresh = None)
-
-outlier_filter
-
-where = np.where(np.array(claims.time_index) == outlier_filter)[0][0]
-outlier_search_list = claims.time_index[where:]
-
-filtered_outliers = []
-if out.nof_outliers > 0:
-    outlier_dates = out.outlier_dates
-    filt = [outl in outlier_search_list for outl in outlier_dates]
-    filtered_outliers = np.array(outlier_dates)[filt].tolist()
-    
-    if len(filtered_outliers) > 0:
-        #print("\nSeries",i)
-        #print(label, sub_set.shape[0])
-        print("Anomaly found!")
-        print(filtered_outliers)
-    
-#lag = 1
-#y_diff = util.difference(y, lag)
-# First diff.
-#util.ts_plot(x=x[lag:], y=y_diff, title='Weekly claim counts (First diff.): '+label) 
-
-
-# Detect anomalies:
-#----------------------
-inside = ''    
-if label in list(claims.level_wise_aggr.keys()):
-
-    inside = claims.level_wise_aggr[label]       # then shows over which set it was aggregated    
-    #new_inside = [str(i)+'\n' for i in inside] 
-    
-    #main = label +':\n\n '+ str(len(filtered_outliers)) + \
-    #    ' outlier(s) detected!\n' + 'Occured at year-calendar week(s): '+ \
-    #    ', '.join(filtered_outliers)+'\n'+'Aggregated over:'+str(new_inside)+'\n'
-    
-    main = label +':\n\n '+ str(len(filtered_outliers)) + \
-            ' outlier(s) detected!\n' + 'Occured at year-period(s): '+ \
-            ', '.join(filtered_outliers)+'\n'+'\nAggregated over: '
-    for i in inside: main += str(i)+'\n'
-    
+if transform in ['log', 'diff_log']:
+    ts_index, ts_values = df['year_period_ts'], np.log(1 + df[target_col])   # log transform
 else:
-    main = label +':\n\n '+ str(len(filtered_outliers)) + \
-        ' outlier(s) detected!\n' + 'Occured at year-period(s): '+ \
-        ', '.join(filtered_outliers)+'\n'
+    ts_index, ts_values = df['year_period_ts'], df[target_col]
+ts_values.index = pd.to_datetime(ts_index) 
 
-    
-pp = plot(fitted.val_series, anomaly = fitted.anomalies, ts_linewidth=1.2, ts_markersize=6, 
-     anomaly_markersize=5, anomaly_color='red', freq_as_period=False, ts_alpha=0.8, anomaly_alpha=0.5)
+val_series = validate_series(ts_values)
 
+if transform in ['diff', 'diff_log']:
+    y_lag = Retrospect(n_steps=2, step_size=1).transform(val_series)
+    y_lag.dropna(inplace=True)              
+    val_series = validate_series(y_lag["t-0"] - y_lag["t-1"])   # first differences
+    #df = df.iloc[1: , :]           # drop first row so dimension of orig. dataframe is up-to-date after first diff. 
 
-# other change point detection algos
-#model = "rbf"  # "l2", "rbf"
-#signal = train.s_deseasonal.to_numpy()
-#signal = y.to_numpy()
-#algo = rpt.Pelt(model=model, min_size=5).fit(signal)
-#algo = rpt.Binseg(model=model).fit(signal)
-#my_bkps = algo.predict(pen=np.log(len(signal))*np.std(signal)**2)
+df.head(10)
 
-#ind = np.zeros(len(fitted.anomalies))
-#ind[np.array(my_bkps)-1] = 1
-#anomalies_algo = pd.Series(ind,name=fitted.anomalies.name, index=fitted.anomalies.index)
-#bb = plot(fitted.val_series, anomaly_true = anomalies_algo, ts_linewidth=1.2, ts_markersize=6, 
-#     at_markersize=5, at_color='red', freq_as_period=False, ts_alpha=0.8, at_alpha=0.5, title = "Algo")
+val_series
 
-#ticklabels = pp.get_xticks().tolist()
-#pp.set_xticklabels(df['time'].tolist())
-#pp.get_xticklabels()
-#pp.get_xticks().tolist()
-#pp.set_xticklabels(a)
+y_lag = Retrospect(n_steps=2, step_size=1).transform(val_series)
+y_lag
 
-# Anomaly probabilities:
-#-------------------------
-plt.figure(figsize=(12,4), dpi=100)
-pro = plt.plot(fitted.anomaly_proba.index, fitted.anomaly_proba, color='tab:blue',label="prob. of anomaly", linestyle='--', marker='o', markerfacecolor='orange', linewidth=1)
-plt.plot(fitted.anomaly_proba.index, [fitted.detect_thresh]*len(fitted.anomaly_proba.index), label="decision threshold",  linewidth=.5)
-plt.gca().set(title="", xlabel="time", ylabel="probability", ylim = plt.ylim(-0.02, 1.05))   #plt.xlim(left=0)
-locs, labels = plt.xticks()
-#plt.xticks(y.index[0::3], labels=df['time'].to_numpy()[0::3], rotation=60)
-plt.title(r'Anomaly probabilities $\pi_{t}, t=1,...,T$', fontdict = {'fontsize' : 14})
-plt.legend(loc='upper left')
-plt.tight_layout()
-plt.show()  
-
-#start, end = pp.get_xlim()
-#pp.xaxis.set_ticks(np.linspace(start, end, num=len(fitted.df['time'].values.tolist()[0::3])))
-#pp.set_xticklabels(fitted.df['time'].values.tolist()[0::3], rotation=65)
-
-#pp.xaxis.set_major_formatter(ticker.FormatStrFormatter('%0.1f'))
-
-# Density plots
-#----------------------------------------------------
-plt.figure(figsize=(12,3), dpi=100)
-#plt.subplot(211)
-y.hist(bins=40)
-plt.gca().set(title=label, xlabel="counts", ylabel="abs. frequency")
-#--------------------------------------------------------------------
-#plt.subplot(212)
-#log_y = np.log(1 + y)
-#log_y.hist(bins=15)
-#plt.gca().set(title='', xlabel="log counts", ylabel="abs. frequency")
-#plt.subplot(212)
-#y.plot(kind='kde')
-#plt.gca().set(title='', xlabel="counts", ylabel="density")
-#------------------------------------------------------------------------
-# Draw Boxplot
-if periodicity == 52 :
-    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(15,6), dpi= 80)
-if periodicity == 12 :    
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(15,6), dpi= 80)
-sns.boxplot(x='year', y='target', data=sub_set, ax=axes[0])
-sns.boxplot(x='month', y='target', data=sub_set, ax=axes[1]).set(ylabel="counts")
-if periodicity == 52 :
-    sns.boxplot(x='period', y='target', data=sub_set, ax=axes[2], orient='v').set(
-    xlabel='week', ylabel="counts")
-#------------------------------------------------------------------------------------------
-
-# Set Titles
-axes[0].set_title('Yearly box plots\n(Trend)', fontsize=18) 
-axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=18)
-if periodicity == 52 :
-    axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=18)
-#plt.yticks(rotation=15)
-plt.xticks(rotation=45)
-
-plt.show()
-
-# Bayesian:
-#trim = 3
-#probm = exact_post_cp(y.values[trim:], alpha = .2, beta = .2, gamma = .2, delta = .2)
-
-#x = np.arange(0, len(y))
-#fig, ax = plt.subplots()
-#rects1 = ax.bar(x, np.append(np.zeros(3), probm), label='posterior', width = 4)
-#plt.title('Posterior p.m.f. of change point')
-#plt.show()
-#plt.plot(x,y,'b')
-#plt.axvline(x[np.argmax(probm)], color='k', linestyle='--', lw=.65)
-
-
-################################################################
-
-
-
-
-anomaly_history = pd.DataFrame(columns=['time_anomaly', 'time_series_name', 'clm_cnt'])
-anomaly_history
-
-# Use pickle file as substitute for Postgres:
-pkl = file.PickleService(path = "anomaly_history.pkl")
-
-pkl.doWrite(anomaly_history)
-
-pkl.doRead()
-
-
-###### PLAYGROUND #########################################
-
-def print_string(string : str = "")-> str:
-    return string
-
-print_string(string="ICE sucks so much...")
-
-# def capitalize(my_func):
-#     def wrapper_function(some_string : str = ""):
-#         return my_func(some_string).upper()    # modify input function....
-#     return wrapper_function
-
-def capitalize(my_func):
-    def wrapper_function(*args, **kwargs):       # accept any number of arbitrary arguments and keyword arguments
-        return my_func(*args, **kwargs).upper()    # modify input function....
-    return wrapper_function
-
-
-def format_it(another_func):
-    def wrapper_function2(*args, **kwargs):       # accept any number of arbitrary arguments and keyword arguments
-        return another_func(*args, **kwargs).split()    # modify input function....
-    return wrapper_function2
-
-
-@format_it     # step 2
-@capitalize    # step 1
-def print_string(string : str = "")-> str:
-    return string
-
-# Call:
-print_string(string="ICE sucks so much...")
-
-# Add arguments to second decorator:
-def format_new(my_arg):
-    def format_it(another_func):
-        def wrapper_function2(*args, **kwargs):       # accept any number of arbitrary arguments and keyword arguments
-            return another_func(*args, **kwargs).split()*my_arg    # modify input function....
-        return wrapper_function2
-    return format_it
-
-
-@format_new(my_arg = 2)     # step 2
-@capitalize    # step 1
-def print_string(string : str = "")-> str:
-    return string
-
-# Call:
-print_string(string="ICE sucks so much...")
-
-
+# No cweek 53 allowed in the following due to the following and other subsequent
+# specifications in time series methods! 
+s_deseasonal = deepcopy(val_series)    # instantiate

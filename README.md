@@ -4,6 +4,33 @@ An ensemble of different time series anomaly detection methods is being construc
 
 <img src= "https://openclipart.org/image/400px/svg_to_png/319677/microscope-retro.png" width="80" />
 
+## Package structure
+
+```
+├── app.py
+├── config.toml
+├── docker-compose.yaml
+├── Dockerfile
+├── environment.yml
+├── README.md
+├── requirements.txt
+├── run_app_locally.sh
+├── src
+│   ├── aac_ts_anomaly
+│   │   ├── config
+│   │   │   ├── global_config.py
+│   │   ├── data
+│   │   │   ├── anomaly_history.pkl
+│   │   │   └── utils.log
+│   │   ├── resources
+│   │   ├── services
+│   │   └── utils
+│   ├── __init__.py
+│   ├── notebooks
+│   ├── setup.py
+│   └── templates
+└── uwsgi.ini
+```
 
 ### Create conda environment with require packages installed
 

@@ -10,7 +10,8 @@ from adtk.transformer import DoubleRollingAggregate, RollingAggregate, Retrospec
 from adtk.pipe import Pipeline, Pipenet
 #from adtk.aggregator import AndAggregator, OrAggregator
 #from adtk.data import split_train_test
-from importlib import reload
+from typing import (Dict, List, Text, Optional, Any)
+#from importlib import reload
 from aac_ts_anomaly.config import global_config as glob
 from aac_ts_anomaly.services import file
 from aac_ts_anomaly.resources import config
@@ -22,7 +23,7 @@ class trainer(claims_reporting):
     """
     Training and prediction pipeline for anomaly detector ensemble
     """ 
-    def __init__(self, hyper_para : dict = None, verbose=False, **kwargs):
+    def __init__(self, hyper_para : dict = None, verbose : bool = False, **kwargs):
         
         super(trainer, self).__init__(**kwargs) 
         self.verbose_train = verbose
@@ -32,7 +33,7 @@ class trainer(claims_reporting):
     #def __del__(self):
     #    class_name = self.__class__.__name__
 
-    def fit(self, df): 
+    def fit(self, df: pd.DataFrame): 
         """
         Train model ensemble.
         Input:
@@ -57,7 +58,6 @@ class trainer(claims_reporting):
         else:
             self.ts_index, self.ts_values = self.df['year_period_ts'], self.df[self.target_col]
         self.ts_values.index = pd.to_datetime(self.ts_index) 
-
         self.val_series = validate_series(self.ts_values)
 
         if self.transform in ['diff', 'diff_log']:
@@ -108,7 +108,7 @@ class trainer(claims_reporting):
         del self.anomalies
         return self
 
-    def predict(self, detect_thresh = None):
+    def predict(self, detect_thresh : float = None):
         """
         Output predicted anaomalies from ensemble
         """
@@ -136,7 +136,7 @@ class trainer(claims_reporting):
             print("Occured at year-period(s):\n", self.outlier_dates)
         return self
 
-    def run_all(self, write_table: bool=None, **prepro_para):
+    def run_all(self, write_table: bool = None, **prepro_para):
         """
         Run all steps from preprocessing to prediction
         for all time series and return all anomalies
@@ -151,7 +151,6 @@ class trainer(claims_reporting):
         # Run preprocessing:
         #--------------------
         gen0 = self.process_data(**prepro_para)
-        
         self.all_series = list(gen0)
 
         # Only look for outliers for y_{t}, t >= outlier_filter
