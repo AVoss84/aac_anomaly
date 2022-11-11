@@ -67,7 +67,7 @@ def main():
         uploaded_file = st.file_uploader("Upload file:", type = ["csv"])    # returns byte object
 
 
-    data_orig, pp, df = None, None, None
+    data_orig, fig_anom, df = None, None, None
     if uploaded_file is not None:
         try:
             #data_orig = pd.read_excel(uploaded_file, sheet_name="data")
@@ -163,7 +163,6 @@ def main():
 
                 st.success("Training done!")
                 st.info(f"{len(all_series)} time series analyzed")
-
                 #st.balloons()
             
             #---------------------------------------------------------------------------------------
@@ -207,9 +206,13 @@ def main():
                             ', '.join(filtered_outliers)+'\n'
 
                     #------------------------------------------------------------------------------
-                    pp = plot(fitted_val_series, anomaly_true = fitted_anomalies, ts_linewidth=2, ts_markersize=6, 
-                        at_markersize=5, at_color='red', freq_as_period=False, ts_alpha=0.8, at_alpha=0.5, 
-                        title = main)
+                    # pp = plot(fitted_val_series, anomaly_true = fitted_anomalies, ts_linewidth=2, ts_markersize=6, 
+                    #     at_markersize=5, at_color='red', freq_as_period=False, ts_alpha=0.8, at_alpha=0.5, 
+                    #     title = main)
+                    where = np.where(fitted_anomalies)[0] 
+                    fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='', dpi=100)
+       
+                    #-------------------------------------------------------------------------------------
 
                     with tab_data: 
                         #st.info(f"Selected series (T = {sub_set.shape[0]}): {label}")
@@ -222,7 +225,8 @@ def main():
             #----------------------------------------------------------------------------------
             with tab_plots:
                     #st.info(f"Series: {st.session_state.label}")
-                    if pp is not None: st.pyplot(pp.figure)   # make above output fig
+                    #if pp is not None: st.pyplot(pp.figure)   # make above output fig
+                    if fig_anom is not None: st.pyplot(fig_anom)  
 
             with tab_plots_season:
                 st.info(f"Series: {st.session_state.label}")
