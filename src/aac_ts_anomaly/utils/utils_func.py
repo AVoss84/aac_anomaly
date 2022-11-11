@@ -92,14 +92,18 @@ def timer(func):
 
 #------------------------------------------------------------------------------
 
-def ts_plot(x, y, title="", xlabel='time', ylabel='counts', dpi=100, **para):
+def ts_plot(x, y, vertical : list = None, title : str ="", xlabel : str ='time', ylabel : str ='target', dpi : int = 100, **para):
         """Plot time series"""
-        #cmap = cm.jet
-        plt.figure(figsize=(20,5), dpi=dpi)
-        plt.plot(x, y, color='tab:blue', linestyle='-', marker='o', markerfacecolor='orange', **para)
-        plt.gca().set(title=title, xlabel=xlabel, ylabel=ylabel, ylim = plt.ylim(), xlim=plt.xlim())   #plt.xlim(left=0)
-        plt.xticks(rotation=70)
-        plt.show()       
+        fig, ax = plt.subplots(figsize=(20, 5), dpi=dpi)
+        ax.plot(x, y, color='tab:blue', linestyle='-', marker='o', markerfacecolor='orange', label='Observation', **para)
+        if vertical : 
+            plt.vlines(x=vertical, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='red', zorder=2, lw=1, label='Anomaly',  linestyle='--')
+        ax.set_title(title, fontdict={'fontsize': 16, 'fontweight': 'medium'})
+        #ax.axhline(1, color="red", linestyle="--")
+        plt.xticks(rotation=30)
+        plt.legend(loc = 'upper left')
+        plt.show() 
+        return fig     
 
 #------------------------------------------------------------------------------
 # Split a univariate dataset into train/test sets
