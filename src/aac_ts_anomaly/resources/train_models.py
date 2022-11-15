@@ -11,40 +11,35 @@ import os
 from importlib import reload
 import adtk
 
-from claims_reporting.utils import utils_func as util
-from claims_reporting.utils import tsa_utils as tsa
-from claims_reporting.service import file
-from claims_reporting.config import global_config as glob
-from claims_reporting.resources import config
-from claims_reporting.service import base
+from aac_ts_anomaly.utils import tsa_utils as tsa
+from aac_ts_anomaly.utils import utils_func as util
+from aac_ts_anomaly.config import global_config as glob
+from aac_ts_anomaly.services import file
+from aac_ts_anomaly.resources import config
+from aac_ts_anomaly.resources import preprocessor as pre
+from aac_ts_anomaly.resources import trainer
 
+reload(pre)
 reload(tsa)
 reload(file)
 reload(config)
-reload(base)
 reload(glob)
 reload(util)
 
-#os.getcwd() 
+#---------------
+# Import data:
+#---------------
+#helper = base.helpers(config_input, config_output)
 
-config_input = config.in_out['input']
-config_input
-config_output = config.in_out['output']
-config_detect = config.in_out['detection']
-
-glob.UC_DATA_DIR
-
-helper = base.helpers(config_input, config_output)
-
-#filename = list(config_input['service']['XLSXService'].values())[0]
-filename = util.get_newest_file(search_for = "AGCS Global Claims PIC - Notification Counts")
+filename = util.get_newest_file(search_for = "agg_time_series_52")    # weekly
 filename
 
 # Import data:
 #---------------
-xls = file.XLSXService(path=filename, dtype= {'claim_creation_week': str}, sheetname='data', index_col=None, header=0)
+csv = file.CSVService(path=filename, delimiter=',')
 
-data_orig = xls.doRead() ; data_orig.shape
+data_orig = csv.doRead() ; data_orig.shape
+data_orig.head()
 
 #aggreg_level, pre_filter, ignore_week_lag, min_sample_size, min_median_cnts = list(config_detect['preprocessing'].values())
 
@@ -54,7 +49,7 @@ reload(util)
 
 # Instantiate class:
 #--------------------
-claims = util.claims_reporting()
+claims = pre.claims_reporting()
 
 #for i in dir(claims): print(i)
 gen = claims.process_data(data_orig, verbose= False)
@@ -86,7 +81,11 @@ df.head(10)
 
 multi_ts = claims.multi_ts
 
-train = util.trainer(verbose=False)
+#------------------------------------------------------------------
+
+reload(trainer)
+
+train = trainer.trainer(verbose=True)
 
 #for i in dir(train): print(i)
 fitted = train.fit(df = df)
@@ -96,12 +95,15 @@ fitted.anomalies
 y = fitted.val_series
 y.head()
 
-res1, res2_new= train.run_all(data_orig = data_orig, write_table=False)
+res1, res2_new = train.run_all(data_orig = data_orig, write_table=False)
+
 res1.tail()
 res2_new
-#
-claims = util.claims_reporting()
-claims
+
+train.count_outliers
+
+#--------------------------------------------------------------------------------------------------------
+
 
 gen0 = claims.process_data(data_orig, ignore_week_lag = 1, min_sample_size = 30, min_median_cnts = 50)
 

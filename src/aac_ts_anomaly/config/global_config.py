@@ -14,10 +14,10 @@ using = 'vm'                   # own virtual machine
 #-----------------------------------------------------------
 if using == 'vm':
     defaults = {
-            "UC_CODE_DIR": str(Path.home() / "Documents/GitHub/aac_anomaly/src"),       
-            "UC_DATA_DIR": str(Path.home() / "Documents/Arbeit/Allianz/AZVers/data"),                      
+            "UC_CODE_DIR": (Path.cwd() / "src").__str__(),       
+            "UC_DATA_DIR": (Path.home() / "Documents/Arbeit/Allianz/AZVers/data").__str__(),                      
             #"UC_REPORT_DIR": "/data/data/submission/report/",           
-            "UC_DATA_PKG_DIR": str(Path.home() / "Documents/GitHub/aac_anomaly/src/aac_ts_anomaly/data/"),    # data folder within package
+            "UC_DATA_PKG_DIR": (Path.cwd() / "src/aac_ts_anomaly/data/").__str__(),    # data folder within package
             #"UC_DB_CONNECTION": 'postgresql://postgres:kakYritiven@agcs-postgres-1-server.service.dsp.allianz/prod',
             "UC_SAVE_TO" : "local",  #"sftp"   local means save to pweave package folder  
             "UC_PORT": "5000", 

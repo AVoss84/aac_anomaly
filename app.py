@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.cm as cm
 import seaborn as sns
-#from statsmodels.graphics.tsaplots import plot_acf, plot_pacf, month_plot, quarter_plot
 from copy import deepcopy
 from importlib import reload
 from adtk.visualization import plot
@@ -26,6 +25,7 @@ from aac_ts_anomaly.services import file
 from aac_ts_anomaly.resources import (config, preprocessor, trainer)
 
 # Set Page name and icon, Layout and sidebar expanded
+#--------------------------------------------------------
 img = Image.open(os.path.join(glob.UC_CODE_DIR,'templates','allianz_logo.jpg'))
 st.set_page_config(page_title='Anomaly Report Creator', page_icon=img, layout="wide", initial_sidebar_state='expanded')
 #----------------------------------------------------------------------------------------------------------------------
@@ -132,13 +132,13 @@ def main():
         # Only create button, if valid file is uploaded
         with st.sidebar:
             #submitted = st.button('Run analysis', key='my_button', on_click = widget_callback)    # boolean 
-            
             if st.button('Run analysis', key='train'):    # no callback needed here
                 
                 with st.spinner(text="Training models..."):                
-                   #st.snow()
+                        #st.snow()
 
                         ################### ANOMALY DETECTION #################################### 
+                        
                         train0 = trainer.trainer(verbose=False)
 
                         results_all, results_new = train0.run_all(data_orig = data_orig, verbose=False)   # write_table = False
@@ -152,7 +152,6 @@ def main():
                         all_series = train0.all_series
                         new_anomalies = list(set(results_final['time_series_name']))
                         st.session_state.new_anomalies = new_anomalies
-
                         st.session_state.filt_suspects_values = train0.filt_suspects_values
                         st.session_state.filt_suspects_plot = train0.filt_suspects_plot 
                         st.session_state.ts_labels = tuple(train0.filt_suspects_plot.keys())
@@ -193,7 +192,6 @@ def main():
                     filtered_outliers = st.session_state.filt_suspects_values[label]['anomaly_dates']
                     sub_set = st.session_state.filt_suspects_plot[label]['df']
                     df = deepcopy(sub_set)
-
                     #-----------------------------------------------------------------------------
                     inside = ''    
                     if label in list(st.session_state.level_wise_aggr.keys()):
@@ -203,19 +201,17 @@ def main():
                                 ' outlier(s) detected!\n' + 'Occured at year-period(s): '+ \
                                 ', '.join(filtered_outliers)+'\n'+'\nAggregated over: '
                         for i in inside: main += str(i)+'\n'
-
                     else:
                         main = label +'\n\n '+ str(len(filtered_outliers)) + \
                             ' outlier(s) detected!\n' + 'Occured at year-period(s): '+ \
                             ', '.join(filtered_outliers)+'\n'
 
-                    #------------------------------------------------------------------------------
+                    #--------------------------------------------------------------------------------------
                     # pp = plot(fitted_val_series, anomaly_true = fitted_anomalies, ts_linewidth=2, ts_markersize=6, 
                     #     at_markersize=5, at_color='red', freq_as_period=False, ts_alpha=0.8, at_alpha=0.5, 
                     #     title = main)
                     where = np.where(fitted_anomalies)[0] 
                     fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='', dpi=100)
-       
                     #-------------------------------------------------------------------------------------
 
                     with tab_data: 
@@ -252,7 +248,6 @@ def main():
                 plt.xticks(rotation=45)
                 #plt.show()
                 st.pyplot(fig)   
-            
 
 ###########
 # Run app:

@@ -32,7 +32,7 @@ class trainer(claims_reporting):
     #def __del__(self):
     #    class_name = self.__class__.__name__
 
-    def fit(self, df): 
+    def fit(self, df : pd.DataFrame): 
         """
         Train model ensemble.
         Input:
@@ -57,7 +57,6 @@ class trainer(claims_reporting):
         else:
             self.ts_index, self.ts_values = self.df['year_period_ts'], self.df[self.target_col]
         self.ts_values.index = pd.to_datetime(self.ts_index) 
-
         self.val_series = validate_series(self.ts_values)
 
         if self.transform in ['diff', 'diff_log']:
@@ -136,6 +135,7 @@ class trainer(claims_reporting):
             print("Occured at year-period(s):\n", self.outlier_dates)
         return self
 
+
     def run_all(self, write_table: bool=None, **prepro_para):
         """
         Run all steps from preprocessing to prediction
@@ -151,7 +151,6 @@ class trainer(claims_reporting):
         # Run preprocessing:
         #--------------------
         gen0 = self.process_data(**prepro_para)
-        
         self.all_series = list(gen0)
 
         # Only look for outliers for y_{t}, t >= outlier_filter
@@ -161,6 +160,7 @@ class trainer(claims_reporting):
 
         self.suspects, self.filt_suspects, self.filt_suspects_values = {}, {}, {}
         self.filt_suspects_plot, self.anomaly_info_all_series = {}, {}
+        self.count_outliers = 0
 
         #-----------------------------------------------------
         # Loop over all univariate (aggregated) time series:
@@ -183,8 +183,10 @@ class trainer(claims_reporting):
                 fitted = self.fit(df = df)
                 out = fitted.predict()
                 self.anomaly_info_all_series[label] = {'df' : df, 'val_series': fitted.val_series, \
-                                                     'anom_flag': fitted.anomalies, 'anom_evidence' : fitted.anomaly_proba} #save all anomaly predictions irrespectively if they are current or not, or have been found before. Such filters will be however applied below 
-        
+                                                       'anom_flag': fitted.anomalies, 'anom_evidence' : fitted.anomaly_proba} #save all anomaly predictions irrespectively if they are current or not, or have been found before. Such filters will be however applied below 
+
+                self.count_outliers += out.nof_outliers
+
                 # In case anomalies have been found:
                 if out.nof_outliers > 0:
                     outlier_dates = out.outlier_dates
@@ -251,7 +253,7 @@ class trainer(claims_reporting):
         return res_to_pg, res_to_pg_NEW
 
 
-    def print_anomalies(self, search_term : str)->str:
+    def print_anomalies(self, search_term : str):
         """
         Simple print function which by inputing a search term
         will output the corresponding 'Region/OE/LoB/Loss Cat' combination which
