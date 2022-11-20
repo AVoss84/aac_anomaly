@@ -164,7 +164,9 @@ else:
 ts_values.index = pd.to_datetime(ts_index) 
 ts_values
 
-
+######## Next time
+# Set the frequency to weeks!!
+# this causes bug in seasonal decomp!!
 
 
 val_series = validate_series(ts_values)
