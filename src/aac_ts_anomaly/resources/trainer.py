@@ -43,6 +43,7 @@ class trainer(claims_reporting):
         """
         assert isinstance(self.stat_transform, list), 'transform must be list.'
         self.transform = self.stat_transform[0]
+        if self.verbose_train : print(f"Using '{self.transform}' as time series preprocessing.")
         self.df = deepcopy(df)
 
         if self.periodicity == 52: 
@@ -79,7 +80,7 @@ class trainer(claims_reporting):
                 self.anomaly_transformer = eval(self.model_transf+"("+"**transf_hyper_para)")
                 self.s_deseasonal = self.anomaly_transformer.fit_transform(self.val_series)
             except Exception as e0:
-                #print(e0)
+                print(e0)
                 if self.verbose_train: print("No seasonal adjustment used.")    
             
         anom_detector = None ; self.nof_models = len(self.hyper_para)

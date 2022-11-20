@@ -162,6 +162,10 @@ if transform in ['log', 'diff_log']:
 else:
     ts_index, ts_values = df['year_period_ts'], df[target_col]
 ts_values.index = pd.to_datetime(ts_index) 
+ts_values
+
+
+
 
 val_series = validate_series(ts_values)
 
@@ -171,13 +175,26 @@ if transform in ['diff', 'diff_log']:
     val_series = validate_series(y_lag["t-0"] - y_lag["t-1"])   # first differences
     #df = df.iloc[1: , :]           # drop first row so dimension of orig. dataframe is up-to-date after first diff. 
 
-df.head(10)
-
-val_series
-
-y_lag = Retrospect(n_steps=2, step_size=1).transform(val_series)
-y_lag
+# y_lag = Retrospect(n_steps=2, step_size=1).transform(val_series)
+# y_lag
 
 # No cweek 53 allowed in the following due to the following and other subsequent
 # specifications in time series methods! 
 s_deseasonal = deepcopy(val_series)    # instantiate
+
+# Have transfomations been specified?
+#--------------------------------------
+if transformers is not None:
+    model_transf = list(transformers.keys())[0]         # take first, only one transformation allowed for now
+    transf_hyper_para = transformers[model_transf]
+    try:                
+        anomaly_transformer = eval(model_transf+"("+"**transf_hyper_para)")
+        s_deseasonal = anomaly_transformer.fit_transform(val_series)
+    except Exception as e0:
+        print(e0)
+        print("No seasonal adjustment used.")    
+
+
+anomaly_transformer 
+val_series
+y_lag

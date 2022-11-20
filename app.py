@@ -211,7 +211,6 @@ def main():
                     #     title = main)
                     where = np.where(fitted_anomalies)[0] 
                     fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='', dpi=100)
-       
                     #-------------------------------------------------------------------------------------
 
                     with tab_data: 

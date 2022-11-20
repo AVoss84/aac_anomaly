@@ -102,6 +102,7 @@ def ts_plot(x, y, vertical : list = None, title : str ="", xlabel : str ='time',
         #ax.axhline(1, color="red", linestyle="--")
         plt.xticks(rotation=30)
         plt.legend(loc = 'upper left')
+        plt.tight_layout()
         plt.show() 
         return fig     
 
