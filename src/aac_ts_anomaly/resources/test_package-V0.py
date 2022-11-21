@@ -162,19 +162,26 @@ if transform in ['log', 'diff_log']:
 else:
     ts_index, ts_values = df['year_period_ts'], df[target_col]
 ts_values.index = pd.to_datetime(ts_index) 
-ts_values
+
+print(ts_values.shape)
+
+#ts_values.to_period('W-MON')
+#ts_values.asfreq('W-MON', method="bfill")
+#ts_values.asfreq('W-MON', method="ffill")  # propagate last valid observation forward to next valid
+
+ts_values_upsampled = ts_values.resample('W-MON').mean().ffill()
+print(ts_values_upsampled.shape)
 
 ######## Next time
 # Set the frequency to weeks!!
 # this causes bug in seasonal decomp!!
-
 
 val_series = validate_series(ts_values)
 
 if transform in ['diff', 'diff_log']:
     y_lag = Retrospect(n_steps=2, step_size=1).transform(val_series)
     y_lag.dropna(inplace=True)              
-    val_series = validate_series(y_lag["t-0"] - y_lag["t-1"])   # first differences
+    val_series = validate_series(y_lag["t-0"] - y_lag["t-1"]).to_period('W-MON')   # first differences
     #df = df.iloc[1: , :]           # drop first row so dimension of orig. dataframe is up-to-date after first diff. 
 
 # y_lag = Retrospect(n_steps=2, step_size=1).transform(val_series)
@@ -196,7 +203,37 @@ if transformers is not None:
         print(e0)
         print("No seasonal adjustment used.")    
 
-
 anomaly_transformer 
 val_series
 y_lag
+
+
+import statsmodels.api as sm
+from statsmodels.tsa import seasonal as sea
+
+# https://www.statsmodels.org/dev/generated/statsmodels.tsa.seasonal.DecomposeResult.html#statsmodels.tsa.seasonal.DecomposeResult
+# Multiplicative Decomposition 
+result_mul = sea.seasonal_decompose(ts_values_upsampled, model='multiplicative', extrapolate_trend='freq', freq=52)
+result_mul.observed
+result_mul.resid
+result_mul.seasonal
+result_mul.trend
+
+
+plt.rcParams.update({'figure.figsize': (5,5)})
+fig = result_mul.plot()#.title('Multiplicative Decompose', fontdict = {'fontsize' : 17})
+axes_dc = fig.get_axes()
+axes_dc[0].set_title("Plot 4: Forecast number of claims - "+label, fontsize=14.5)
+axes_dc[0].set_xlabel('time index')
+#plt.title('subplot 2')
+#result_add.plot().suptitle('Additive Decompose', fontsize=15)
+plt.show()
+
+
+# from sktime.transformations.series.detrend import Deseasonalizer
+# from sktime.datasets import load_airline
+
+# y = load_airline()
+# transformer = Deseasonalizer()
+# y_hat = transformer.fit_transform(y)
+
