@@ -3,10 +3,10 @@ dependencies:
   - python=3.7
   - pip
   - pandas
+  - statsmodels==0.13.5
   #- jupyter    # for use in Jupyter notebook
   #- ipykernel   # for recognition of conda env in Jupyter notebook
   - pip:
-  #  # for regular pip packages
     - matplotlib==3.5.2
     - streamlit==1.0   # 1.13
     - importlib  

@@ -20,4 +20,6 @@ joblib==1.0.0
 xlsxwriter==1.3.6
 xlrd==1.2.0
 tqdm
-#importlib   # reload modules
+sktime==0.14.*
+statsmodels==0.13.5
+#importlib

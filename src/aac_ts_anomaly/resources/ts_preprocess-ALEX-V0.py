@@ -61,7 +61,7 @@ reload(file)
 
 # Import data:
 #---------------
-csv = file.CSVService(path=filename, dtype= {'time_index': str}, delimiter=',')
+csv = file.CSVService(path=filename, delimiter=',')
 
 data_orig = csv.doRead() ; data_orig.shape
 data_orig.head()
@@ -111,7 +111,7 @@ df.head()
 
 df['year_period_ts'] = df.apply(lambda row: _year_week(row.year, row.period), axis=1)
 #df['year_period_ts'] = df.apply(lambda row: _convert2date(row.year, row.period), axis=1)
-df.head()
+df #.head()
 
 #ignore_week_lag = 1
 min_year = min(years)
