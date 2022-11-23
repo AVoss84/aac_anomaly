@@ -134,36 +134,39 @@ def main():
             #submitted = st.button('Run analysis', key='my_button', on_click = widget_callback)    # boolean 
             
             if st.button('Run analysis', key='train'):    # no callback needed here
-
-                ################### ANOMALY DETECTION #################################### 
-                train0 = trainer.trainer(verbose=False)
-
-                results_all, results_new = train0.run_all(data_orig = data_orig, verbose=False)   # write_table = False
-
-                results_final = deepcopy(results_new)      # only show new outliers excluding ones shown before
-                #results_final = deepcopy(results_all)      # show all detected outliers potentially including ones shown before
-                results = deepcopy(results_final)
-                results.rename(columns={'time_anomaly': 'Time', 'time_series_name': 'Time series', 'target': 'Claim counts'}, inplace=True)
-                results.reset_index(inplace=True, drop=True)
-
-                all_series = train0.all_series
-                new_anomalies = list(set(results_final['time_series_name']))
-                st.session_state.new_anomalies = new_anomalies
-
-                st.session_state.filt_suspects_values = train0.filt_suspects_values
-                st.session_state.filt_suspects_plot = train0.filt_suspects_plot 
-                st.session_state.ts_labels = tuple(train0.filt_suspects_plot.keys())
-                st.session_state.level_wise_aggr = train0.level_wise_aggr
                 
-                try:
-                    where = np.where(np.array(train0.time_index) == outlier_filter)[0][0]
-                    outlier_search_list = train0.time_index[where:]
-                except Exception as ex:
-                    outlier_search_list = []
+                st.text(" ")
+                with st.spinner('Wait for it...'):
 
-                st.success("Training done!")
-                st.info(f"{len(all_series)} time series analyzed")
-                #st.balloons()
+                    ################### ANOMALY DETECTION #################################### 
+                    train0 = trainer.trainer(verbose=False)
+
+                    results_all, results_new = train0.run_all(data_orig = data_orig, verbose=False)   # write_table = False
+
+                    results_final = deepcopy(results_new)      # only show new outliers excluding ones shown before
+                    #results_final = deepcopy(results_all)      # show all detected outliers potentially including ones shown before
+                    results = deepcopy(results_final)
+                    results.rename(columns={'time_anomaly': 'Time', 'time_series_name': 'Time series', 'target': 'Claim counts'}, inplace=True)
+                    results.reset_index(inplace=True, drop=True)
+
+                    all_series = train0.all_series
+                    new_anomalies = list(set(results_final['time_series_name']))
+                    st.session_state.new_anomalies = new_anomalies
+
+                    st.session_state.filt_suspects_values = train0.filt_suspects_values
+                    st.session_state.filt_suspects_plot = train0.filt_suspects_plot 
+                    st.session_state.ts_labels = tuple(train0.filt_suspects_plot.keys())
+                    st.session_state.level_wise_aggr = train0.level_wise_aggr
+                    
+                    try:
+                        where = np.where(np.array(train0.time_index) == outlier_filter)[0][0]
+                        outlier_search_list = train0.time_index[where:]
+                    except Exception as ex:
+                        outlier_search_list = []
+
+                    st.success("Training done!")
+                    st.info(f"{len(all_series)} time series analyzed")
+                    #st.balloons()
             
             #---------------------------------------------------------------------------------------
             #st.markdown("***")
@@ -231,7 +234,7 @@ def main():
                 st.info(f"Series: {st.session_state.label}")
 
                 # Draw Boxplot
-                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(15,6), dpi= 60)
+                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(13,5), dpi= 60)
                 if df is not None:
                     sns.boxplot(x='year', y='target', data=df, ax=axes[0])
                     sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="counts")

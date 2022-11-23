@@ -20,7 +20,6 @@ from aac_ts_anomaly.resources import config
 from aac_ts_anomaly.resources.preprocessor import claims_reporting
 from aac_ts_anomaly.utils.utils_func import timer, MAD, IQR
 
-
 class trainer(claims_reporting):
     def __init__(self, hyper_para : dict = None, verbose : bool = False, **kwargs):
         """Training and prediction pipeline for anomaly detector ensemble
