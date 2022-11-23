@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from copy import deepcopy
 from datetime import datetime
+from statsmodels.tsa import seasonal as sea
+
 from adtk.data import validate_series
 from adtk.visualization import plot
 from adtk.detector import ThresholdAD, InterQuartileRangeAD, GeneralizedESDTestAD, PersistAD, QuantileAD
@@ -20,11 +22,13 @@ from aac_ts_anomaly.utils.utils_func import timer, MAD, IQR
 
 
 class trainer(claims_reporting):
-    """
-    Training and prediction pipeline for anomaly detector ensemble
-    """ 
     def __init__(self, hyper_para : dict = None, verbose : bool = False, **kwargs):
-        
+        """Training and prediction pipeline for anomaly detector ensemble
+
+        Args:
+            hyper_para (dict, optional): _description_. Defaults to None.
+            verbose (bool, optional): _description_. Defaults to False.
+        """
         super(trainer, self).__init__(**kwargs) 
         self.verbose_train = verbose
         if hyper_para is not None: self.hyper_para = hyper_para   # overwrite yaml parameter
@@ -36,6 +40,7 @@ class trainer(claims_reporting):
     def fit(self, df: pd.DataFrame): 
         """
         Train model ensemble.
+
         Input:
         ------
         df: dataframe being the output of the above preprocessing class
@@ -50,9 +55,11 @@ class trainer(claims_reporting):
                 self.df['year_period_ts'] = self.df.apply(lambda row: self._year_week(row.year, row.period), axis=1)
                 # Remove calendar week 53 if there! Frequ. = 52 from now on.
                 self.df = self._correct_cweek_53(self.df, time_col = 'year_period_ts', verbose=self.verbose_train)
+                self.df = self.upsample_time_series(self.df)
 
         if self.periodicity == 12:
                 self.df['year_period_ts'] = self.df.apply(lambda row: self._convert2date(row.year, row.period), axis=1)
+                raise NotImplementedError("Monthly frequency not fully implemented yet!")
 
         if self.transform in ['log', 'diff_log']:
             self.ts_index, self.ts_values = self.df['year_period_ts'], np.log(1 + self.df[self.target_col])   # log transform
@@ -77,8 +84,11 @@ class trainer(claims_reporting):
             self.model_transf = list(self.transformers.keys())[0]         # take first, only one transformation allowed for now
             transf_hyper_para = self.transformers[self.model_transf]
             try:                
-                self.anomaly_transformer = eval(self.model_transf+"("+"**transf_hyper_para)")
-                self.s_deseasonal = self.anomaly_transformer.fit_transform(self.val_series)
+                result_mul = sea.seasonal_decompose(self.val_series, extrapolate_trend='freq', **self.transformers['ClassicSeasonalDecomposition'])
+                self.s_deseasonal = result_mul.observed - result_mul.seasonal   # result_mul.resid
+
+                # self.anomaly_transformer = eval(self.model_transf+"("+"**transf_hyper_para)")
+                # self.s_deseasonal = self.anomaly_transformer.fit_transform(self.val_series)
             except Exception as e0:
                 print(e0)
                 if self.verbose_train: print("No seasonal adjustment used.")    
@@ -110,8 +120,11 @@ class trainer(claims_reporting):
         return self
 
     def predict(self, detect_thresh : float = None):
-        """
-        Output predicted anaomalies from ensemble
+        """Output predicted anaomalies from ensemble
+        Args:
+            detect_thresh (float, optional): Decision threshold. Defaults to None.
+        Returns:
+            _type_: pointer
         """
         if detect_thresh is not None:
             self.detect_thresh = detect_thresh 
@@ -140,7 +153,7 @@ class trainer(claims_reporting):
     def run_all(self, write_table: bool = None, **prepro_para):
         """
         Run all steps from preprocessing to prediction
-        for all time series and return all anomalies
+        for all time series and return all anomalies.
         Input:
         see arguments from process_data() method, including the input dataframe
         """

@@ -49,6 +49,30 @@ class claims_reporting(AbstractPreprocessor):
                 six_months_ago = date.today() - relativedelta(months=age)
                 self.outlier_filter = six_months_ago.strftime("%Y-%m")
 
+
+    def upsample_time_series(self, df : pd.DataFrame)-> pd.DataFrame:
+                """Upsample time series to have complete cycle, i.e. regular time series
+
+                Args:
+                        df (pd.DataFrame): _description_
+                Returns:
+                        pd.DataFrame: Corrected input dataframe
+                """
+                df_upsample = df.resample('W-MON', on = 'year_period_ts').sum().ffill().reset_index()   # upsample
+                tt = df_upsample[['year_period_ts']].merge(df, how= "left", left_on = 'year_period_ts', right_on = 'year_period_ts')  # join with old df; creates nans 
+                where_nans = tt[tt['time'].isnull()].year_period_ts.index.tolist()    #find nan rows
+                nan_dates = tt[tt['time'].isnull()].year_period_ts.tolist()              # find dates of nan rows
+                
+                # Impute/fill NaNs 
+                #-------------------
+                for row, ds in zip(where_nans, nan_dates):
+                        tt.loc[row, 'year'], tt.loc[row, 'month'] = ds.year, ds.month                # get year, month part
+                        tt.loc[row, 'period'], tt.loc[row, 'time'] = ds.week, "{}-{}".format(ds.year, ds.week)     # create year-week
+
+                tt['target'] = tt[['target']].fillna(method ='ffill')            # pad with previous value
+                tt[['year', 'month', 'period']] = tt[['year', 'month', 'period']].astype(int)     # set back to integer
+                return tt
+
     #@timer
     def process_data(self, data_orig : pd.core.frame.DataFrame, 
                     aggreg_level : str = None, agg_func = 'sum', aggreg_dimensions : list = ['Lob','Event_descr'],

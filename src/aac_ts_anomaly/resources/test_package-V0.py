@@ -35,7 +35,7 @@ reload(preprocessor)
 filename = util.get_newest_file(search_for = "agg_time_series_52",  src_dir=glob.UC_DATA_DIR)
 filename
 
-csv = file.CSVService(path=filename, dtype= {'time_index': str}, delimiter=',')
+csv = file.CSVService(path=filename, delimiter=',')
 
 data_orig = csv.doRead() ; data_orig.shape
 data_orig.head()
@@ -151,8 +151,19 @@ from adtk.pipe import Pipeline, Pipenet
 df['year_period_ts'] = df.apply(lambda row: claims._year_week(row.year, row.period), axis=1)
 # Remove calendar week 53 if there! Frequ. = 52 from now on.
 df = claims._correct_cweek_53(df, time_col = 'year_period_ts')
-
 df.head()
+
+df.shape
+
+df = claims.upsample_time_series(df)
+df.shape
+
+#df_new = df.resample('W-MON', on = 'year_period_ts') # .median().ffill()
+#df_upsample = df.resample('W-MON', on = 'year_period_ts').sum().ffill().reset_index()
+
+#a = df.set_index('year_period_ts').resample('W-MON').mean().head(10)
+#df_upsample = df.resample('W-MON', on = 'year_period_ts').ffill(limit=1)
+
 
 transform = 'diff'
 target_col = "target"
@@ -169,19 +180,19 @@ print(ts_values.shape)
 #ts_values.asfreq('W-MON', method="bfill")
 #ts_values.asfreq('W-MON', method="ffill")  # propagate last valid observation forward to next valid
 
-ts_values_upsampled = ts_values.resample('W-MON').mean().ffill()
-print(ts_values_upsampled.shape)
+#ts_values = ts_values.resample('W-MON').mean().ffill()
 
-######## Next time
-# Set the frequency to weeks!!
-# this causes bug in seasonal decomp!!
+print(ts_values.shape)
+print(df.shape)
+
+#df_upsample.merge(ts_values, how= "inner", left_index=True, right_index=True).shape  #check
 
 val_series = validate_series(ts_values)
 
 if transform in ['diff', 'diff_log']:
     y_lag = Retrospect(n_steps=2, step_size=1).transform(val_series)
     y_lag.dropna(inplace=True)              
-    val_series = validate_series(y_lag["t-0"] - y_lag["t-1"]).to_period('W-MON')   # first differences
+    val_series = validate_series(y_lag["t-0"] - y_lag["t-1"])   # first differences
     #df = df.iloc[1: , :]           # drop first row so dimension of orig. dataframe is up-to-date after first diff. 
 
 # y_lag = Retrospect(n_steps=2, step_size=1).transform(val_series)
@@ -193,41 +204,39 @@ s_deseasonal = deepcopy(val_series)    # instantiate
 
 # Have transfomations been specified?
 #--------------------------------------
-if transformers is not None:
-    model_transf = list(transformers.keys())[0]         # take first, only one transformation allowed for now
-    transf_hyper_para = transformers[model_transf]
-    try:                
-        anomaly_transformer = eval(model_transf+"("+"**transf_hyper_para)")
-        s_deseasonal = anomaly_transformer.fit_transform(val_series)
-    except Exception as e0:
-        print(e0)
-        print("No seasonal adjustment used.")    
+# if transformers is not None:
+#     model_transf = list(transformers.keys())[0]         # take first, only one transformation allowed for now
+#     transf_hyper_para = transformers[model_transf]
+#     try:                
+#         anomaly_transformer = eval(model_transf+"("+"**transf_hyper_para)")
+#         s_deseasonal = anomaly_transformer.fit_transform(val_series)
+#     except Exception as e0:
+#         print(e0)
+#         print("No seasonal adjustment used.")    
 
-anomaly_transformer 
 val_series
 y_lag
-
 
 import statsmodels.api as sm
 from statsmodels.tsa import seasonal as sea
 
 # https://www.statsmodels.org/dev/generated/statsmodels.tsa.seasonal.DecomposeResult.html#statsmodels.tsa.seasonal.DecomposeResult
-# Multiplicative Decomposition 
-result_mul = sea.seasonal_decompose(ts_values_upsampled, model='multiplicative', extrapolate_trend='freq', freq=52)
-result_mul.observed
-result_mul.resid
-result_mul.seasonal
-result_mul.trend
 
+result_mul = sea.seasonal_decompose(ts_values, extrapolate_trend='freq', **transformers['ClassicSeasonalDecomposition'])
 
-plt.rcParams.update({'figure.figsize': (5,5)})
-fig = result_mul.plot()#.title('Multiplicative Decompose', fontdict = {'fontsize' : 17})
-axes_dc = fig.get_axes()
-axes_dc[0].set_title("Plot 4: Forecast number of claims - "+label, fontsize=14.5)
-axes_dc[0].set_xlabel('time index')
-#plt.title('subplot 2')
-#result_add.plot().suptitle('Additive Decompose', fontsize=15)
-plt.show()
+s_deseasonal = result_mul.observed - result_mul.seasonal
+s_deseasonal 
+obs = result_mul.resid + result_mul.seasonal + result_mul.trend
+obs
+
+# plt.rcParams.update({'figure.figsize': (5,5)})
+# fig = result_mul.plot()#.title('Multiplicative Decompose', fontdict = {'fontsize' : 17})
+# axes_dc = fig.get_axes()
+# axes_dc[0].set_title("Plot 4: Forecast number of claims - "+label, fontsize=14.5)
+# axes_dc[0].set_xlabel('time index')
+# #plt.title('subplot 2')
+# #result_add.plot().suptitle('Additive Decompose', fontsize=15)
+# plt.show()
 
 
 # from sktime.transformations.series.detrend import Deseasonalizer
@@ -237,3 +246,35 @@ plt.show()
 # transformer = Deseasonalizer()
 # y_hat = transformer.fit_transform(y)
 
+hyper_para
+
+from adtk.visualization import plot
+from adtk.detector import ThresholdAD, InterQuartileRangeAD, GeneralizedESDTestAD, PersistAD, QuantileAD
+from adtk.detector import LevelShiftAD, VolatilityShiftAD, SeasonalAD, AutoregressionAD
+from adtk.transformer import DoubleRollingAggregate, RollingAggregate, Retrospect, ClassicSeasonalDecomposition
+from adtk.pipe import Pipeline, Pipenet
+
+# Loop over all base learners for building the ensemble learner    
+#---------------------------------------------------------------
+for z, model in enumerate(hyper_para.keys()):            
+    anom_detector = eval(model+"("+"**hyper_para['"+model+"'])")               # evaluate estimator expressions
+    model_abstr = [(model, anom_detector)]
+    pipe = Pipeline(model_abstr)
+    try:
+        train_res = pipe.fit_detect(s_deseasonal).rename(model, inplace=False).to_frame()     # fit estimator and predict
+    except Exception as e1:
+        print(e1) ; train_res = None
+    if z==0:
+        anomalies = deepcopy(train_res)    # instantiate
+    else:
+        anomalies = pd.concat([anomalies,train_res], axis=1)
+    anomalies = anomalies*1.    
+
+anomalies.fillna(0, inplace=True)         
+if 'anom_detector' in dir(): 
+    del anom_detector
+
+anomaly_counts = anomalies.sum(axis=1)    
+anomaly_proba = anomalies.mean(axis=1)
+anomalies_or = anomalies.max(axis=1)  # union/or operation
+del anomalies

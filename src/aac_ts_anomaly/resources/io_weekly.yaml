@@ -12,7 +12,7 @@ detection:
        min_median_target : 20
   training: 
        outlier_filter :            # defaults to None           # extend [..[ to [...]
-       stat_transform : ['diff']    # ['none','diff', 'log', 'diff_log']
+       stat_transform : ['log']    # ['none','diff', 'log', 'diff_log']
        hyper_para: 
           QuantileAD : {'high': 0.99, 'low' : 0.01}              
           PersistAD : {'c' : 1.5, 'side' : 'positive', 'window': 5}
@@ -22,7 +22,8 @@ detection:
           InterQuartileRangeAD : {'c': 1.5}
           AutoregressionAD : {'n_steps': 5, 'step_size': 1, 'c': 1.5, 'side':  'both'}
        transformers:
-          ClassicSeasonalDecomposition : {'freq' : 52, 'trend' : False}  
+          ClassicSeasonalDecomposition : {'period' : 52, 'model': 'additive'}   #from statsmodel
+          #ClassicSeasonalDecomposition : {'freq' : 52, 'trend' : False}  
           #RollingAggregate: {'agg':'mean', 'window': 3}
           #DoubleRollingAggregate : {'agg':'mean', 'window':3, 'diff': 'diff'}
   prediction:
