@@ -84,7 +84,8 @@ class trainer(claims_reporting):
             transf_hyper_para = self.transformers[self.model_transf]
             try:                
                 result_mul = sea.seasonal_decompose(self.val_series, extrapolate_trend='freq', **self.transformers['ClassicSeasonalDecomposition'])
-                self.s_deseasonal = result_mul.observed - result_mul.seasonal   # result_mul.resid
+                #self.s_deseasonal = result_mul.observed - result_mul.seasonal   
+                self.s_deseasonal = result_mul.resid
 
                 # self.anomaly_transformer = eval(self.model_transf+"("+"**transf_hyper_para)")
                 # self.s_deseasonal = self.anomaly_transformer.fit_transform(self.val_series)
@@ -194,6 +195,9 @@ class trainer(claims_reporting):
             if (label != 'all') and nondegenerate:        # all subseries except 'all'
                 df = deepcopy(sub_set)
                 fitted = self.fit(df = df)
+
+                df = fitted.df  # upsampled original dataframe
+
                 out = fitted.predict()
                 self.anomaly_info_all_series[label] = {'df' : df, 'val_series': fitted.val_series, \
                                                        'anom_flag': fitted.anomalies, 'anom_evidence' : fitted.anomaly_proba} #save all anomaly predictions irrespectively if they are current or not, or have been found before. Such filters will be however applied below 
@@ -241,8 +245,7 @@ class trainer(claims_reporting):
             self.anomaly_history = pkl.doRead()
         except Exception as e:
             if self.verbose_train:
-                print(e)
-                print("Create table", self.tbl_name, "first before you read from it!")
+                print(e) ; print("Create table", self.tbl_name, "first before you read from it!")
             self.anomaly_history = pd.DataFrame(columns=['time_anomaly', 'time_series_name', 'clm_cnt'])
             
         # Only return anomalies that have not been

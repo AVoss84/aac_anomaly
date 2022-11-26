@@ -139,6 +139,8 @@ len(all_series)
 new_anomalies = list(set(results_final['time_series_name']))
 new_anomalies
 
+all_series[6]
+fitted.anomaly_info_all_series
 
 # Change plots to take original series
 # after having used transformed data

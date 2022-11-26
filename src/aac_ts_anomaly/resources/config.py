@@ -1,4 +1,3 @@
-import os
 from aac_ts_anomaly.config import global_config as glob 
 from aac_ts_anomaly.services.file import YAMLservice
 

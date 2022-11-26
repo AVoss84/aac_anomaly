@@ -1,6 +1,7 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib.dates as mdates
 import pandas as pd
 import numpy as np
 from scipy.special import loggamma #gamma as gamma_fct
@@ -77,7 +78,7 @@ def get_newest_file(search_for : str = "AGCS Global Claims PIC - Notification Co
             
 #---------------------------------------------------------------------------------------
 
-# run time decorator for any function func:
+# Run time decorator for any function func:
 def timer(func):
     """Print the runtime of the decorated function"""
     @wraps(func)
@@ -92,15 +93,21 @@ def timer(func):
 
 #------------------------------------------------------------------------------
 
-def ts_plot(x, y, vertical : list = None, title : str ="", xlabel : str ='time', ylabel : str ='target', dpi : int = 100, **para):
-        """Plot time series"""
+def ts_plot(x, y: np.array, vertical : list = None, title : str ="", xlabel : str ='time', ylabel : str ='target', dpi : int = None, **para):
+        """Plot time series together with detected anomalies"""
         fig, ax = plt.subplots(figsize=(20, 5), dpi=dpi)
         ax.plot(x, y, color='tab:blue', linestyle='-', marker='o', markerfacecolor='orange', label='Observation', **para)
         if vertical : 
-            plt.vlines(x=vertical, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='red', zorder=2, lw=1, label='Anomaly',  linestyle='--')
+            plt.vlines(x=vertical, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='red', zorder=2, lw=.65, label='Anomaly',  linestyle='--')
         ax.set_title(title, fontdict={'fontsize': 16, 'fontweight': 'medium'})
         #ax.axhline(1, color="red", linestyle="--")
-        plt.xticks(rotation=30)
+        # set monthly locator
+        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+        # set formatter
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%W-%Y'))
+        # set font and rotation for date tick labels
+        plt.gcf().autofmt_xdate()
+        plt.xticks(rotation=80)
         plt.legend(loc = 'upper left')
         plt.tight_layout()
         plt.show() 

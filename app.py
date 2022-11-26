@@ -210,7 +210,10 @@ def main():
                     #     at_markersize=5, at_color='red', freq_as_period=False, ts_alpha=0.8, at_alpha=0.5, 
                     #     title = main)
                     where = np.where(fitted_anomalies)[0] 
-                    fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='', dpi=100)
+                    # Transformed
+                    #fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='')
+                    # Original series:
+                    fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='', dpi=100)
                     #-------------------------------------------------------------------------------------
 
                     with tab_data: 
@@ -231,20 +234,20 @@ def main():
                 st.info(f"Series: {st.session_state.label}")
 
                 # Draw Boxplot
-                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(13,5), dpi= 60)
+                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(11,4))   # , dpi= 60
                 if df is not None:
                     sns.boxplot(x='year', y='target', data=df, ax=axes[0])
-                    sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="counts")
+                    sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="target")
                     if periodicity == 52 :
                         sns.boxplot(x='period', y='target', data=df, ax=axes[2], orient='v').set(
-                        xlabel='week', ylabel="counts")
+                        xlabel='week', ylabel="target")
                 #------------------------------------------------------------------------------------------
                 # Set Titles
                 axes[0].set_title('Yearly box plots\n(Trend)', fontsize=12) 
                 axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=12)
                 if periodicity == 52 : axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=12)
                 #plt.yticks(rotation=15)
-                plt.xticks(rotation=45)
+                plt.xticks(rotation=65)
                 #plt.show()
                 st.pyplot(fig)   
 
