@@ -93,9 +93,22 @@ def timer(func):
 
 #------------------------------------------------------------------------------
 
-def ts_plot(x, y: np.array, vertical : list = None, title : str ="", xlabel : str ='time', ylabel : str ='target', dpi : int = None, **para):
-        """Plot time series together with detected anomalies"""
-        fig, ax = plt.subplots(figsize=(20, 5), dpi=dpi)
+def ts_plot(x, y: np.array, vertical : list = None, title : str ="", xlabel : str ='Time', ylabel : str ='target', dpi : int = None, **para):
+        """Plot time series together with detected anomalies
+
+        Args:
+            x (_type_): _description_
+            y (np.array): _description_
+            vertical (list, optional): _description_. Defaults to None.
+            title (str, optional): _description_. Defaults to "".
+            xlabel (str, optional): _description_. Defaults to 'time'.
+            ylabel (str, optional): _description_. Defaults to 'target'.
+            dpi (int, optional): _description_. Defaults to None.
+
+        Returns:
+            plt.figure.Figure: matplotlib object
+        """
+        fig, ax = plt.subplots(figsize=(20, 4.5), dpi=dpi)
         ax.plot(x, y, color='tab:blue', linestyle='-', marker='o', markerfacecolor='orange', label='Observation', **para)
         if vertical : 
             plt.vlines(x=vertical, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='red', zorder=2, lw=.65, label='Anomaly',  linestyle='--')
@@ -104,14 +117,41 @@ def ts_plot(x, y: np.array, vertical : list = None, title : str ="", xlabel : st
         # set monthly locator
         ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
         # set formatter
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%W-%Y'))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%W-%y'))
         # set font and rotation for date tick labels
         plt.gcf().autofmt_xdate()
-        plt.xticks(rotation=80)
+        plt.xticks(rotation=70)
         plt.legend(loc = 'upper left')
         plt.tight_layout()
         plt.show() 
         return fig     
+
+
+def anomaly_prob_plot(x, y: np.array, detect_thresh: float = 0.5, dpi : int = None, **para):
+    """Plot anomaly probabilities for each date
+    Args:
+        x (_type_): _description_
+        y (np.array): _description_
+        detect_thresh (float, optional): _description_. Defaults to 0.5.
+        dpi (int, optional): _description_. Defaults to None.
+
+    Returns:
+        plt.figure.Figure: matplotlib object
+    """
+    fig, ax = plt.subplots(figsize=(20, 4), dpi=dpi)
+    pro = plt.plot(x, y, color='tab:blue',label="Anomaly probability", linestyle='--', marker='o', markerfacecolor='orange', linewidth=1)
+    plt.plot(x, [detect_thresh]*len(x), label="Decision threshold",  linewidth=.4, color="red", linestyle='--')
+    plt.gca().set(title="", xlabel="Time", ylabel="Probability", ylim = plt.ylim(-0.02, 1.05))   #plt.xlim(left=0)
+    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%W-%y'))
+    # set font and rotation for date tick labels
+    plt.gcf().autofmt_xdate()
+    plt.xticks(rotation=70)
+    plt.title(r'Anomaly probabilities $\pi_{t}, t=1,...,T$', fontdict = {'fontsize' : 14})
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.show()  
+    return fig
 
 #------------------------------------------------------------------------------
 # Split a univariate dataset into train/test sets

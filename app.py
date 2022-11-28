@@ -33,6 +33,7 @@ periodicity = 52
 anomaly_history = pd.DataFrame(columns=['time_anomaly', 'time_series_name', 'clm_cnt'])
 config_detect = config.in_out52['detection']
 outlier_filter = config_detect['training']['outlier_filter']
+detect_thresh = config_detect['prediction']['detect_thresh']
 #--------------------------------------------------------------------------------------------------------
 age = 6
 if outlier_filter is None:
@@ -67,7 +68,7 @@ def main():
         uploaded_file = st.file_uploader("Upload file:", type = ["csv"])    # returns byte object
 
 
-    data_orig, fig_anom, df = None, None, None
+    data_orig, fig_anom, df, fig_anom_prob = None, None, None, None
     if uploaded_file is not None:
         try:
             #data_orig = pd.read_excel(uploaded_file, sheet_name="data")
@@ -186,7 +187,7 @@ def main():
                     fitted_val_series = st.session_state.val['val_series']
                     y = fitted_val_series
                     fitted_anomalies = st.session_state.val['anom_flag']
-                    anomaly_proba = st.session_state.val['anom_evidence']           # anomaly probabilities
+                    fitted_anomaly_proba = st.session_state.val['anom_evidence']           # anomaly probabilities
 
                     filtered_outliers = st.session_state.filt_suspects_values[label]['anomaly_dates']
                     sub_set = st.session_state.filt_suspects_plot[label]['df']
@@ -211,7 +212,10 @@ def main():
                     # Transformed
                     #fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='')
                     # Original series:
-                    fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='', dpi=100)
+                    fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, dpi=100)
+                    
+                    # Plot anomaly probabilities:
+                    fig_anom_prob = util.anomaly_prob_plot(x = fitted_anomaly_proba.index, y = fitted_anomaly_proba, detect_thresh = detect_thresh, dpi=100)
                     #-------------------------------------------------------------------------------------
 
                     with tab_data: 
@@ -222,28 +226,31 @@ def main():
                             df1 = df.rename(columns={'month': 'Month', 'time': 'Time', target_col : 'Target'}, inplace=False) 
                             st.table(df1[['Time', 'Month','Target']])
 
-            #----------------------------------------------------------------------------------
+            #---------------------------------------------------------------------------------------------------
             with tab_plots:
                     #st.info(f"Series: {st.session_state.label}")
                     #if pp is not None: st.pyplot(pp.figure)   # make above output fig
                     if fig_anom is not None: st.pyplot(fig_anom)  
+                    st.text(" ")
+                    if fig_anom_prob: st.pyplot(fig_anom_prob)  
 
             with tab_plots_season:
                 st.info(f"Series: {st.session_state.label}")
 
                 # Draw Boxplot
-                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10,3))   # , dpi= 60
+                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(20,7))   # , dpi= 60
                 if df is not None:
                     sns.boxplot(x='year', y='target', data=df, ax=axes[0])
-                    sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="target")
+                    sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="")
                     if periodicity == 52 :
                         sns.boxplot(x='period', y='target', data=df, ax=axes[2], orient='v').set(
-                        xlabel='week', ylabel="target")
+                        xlabel='week', ylabel="")
                 #------------------------------------------------------------------------------------------
                 # Set Titles
-                axes[0].set_title('Yearly box plots\n(Trend)', fontsize=9) 
-                axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=9)
-                if periodicity == 52 : axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=9)
+                fontsize=11
+                axes[0].set_title('Yearly box plots\n(Trend)', fontsize=fontsize) 
+                axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=fontsize)
+                if periodicity == 52 : axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=fontsize)
                 #plt.yticks(rotation=15)
                 plt.xticks(rotation=45)
                 #plt.show()
@@ -254,4 +261,4 @@ def main():
 ###########
 main()
 
-# Next ToDos: add Dockerfile! Then deploy to AWS! 
+# Next ToDos: deploy to AWS
