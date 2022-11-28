@@ -28,7 +28,7 @@ detection:
           #DoubleRollingAggregate : {'agg':'mean', 'window':3, 'diff': 'diff'}
   prediction:
        n_step_ahead : 1
-       detect_thresh: 0.75
+       detect_thresh: 0.7
 
 output:
   report_filename: 'claims_anomaly_report'

@@ -215,6 +215,7 @@ def main():
                     fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, dpi=100)
                     
                     # Plot anomaly probabilities:
+                    #-----------------------------
                     fig_anom_prob = util.anomaly_prob_plot(x = fitted_anomaly_proba.index, y = fitted_anomaly_proba, detect_thresh = detect_thresh, dpi=100)
                     #-------------------------------------------------------------------------------------
 
@@ -238,7 +239,7 @@ def main():
                 st.info(f"Series: {st.session_state.label}")
 
                 # Draw Boxplot
-                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(20,7))   # , dpi= 60
+                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(18,6))   # , dpi= 60
                 if df is not None:
                     sns.boxplot(x='year', y='target', data=df, ax=axes[0])
                     sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="")
@@ -247,7 +248,7 @@ def main():
                         xlabel='week', ylabel="")
                 #------------------------------------------------------------------------------------------
                 # Set Titles
-                fontsize=11
+                fontsize=12
                 axes[0].set_title('Yearly box plots\n(Trend)', fontsize=fontsize) 
                 axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=fontsize)
                 if periodicity == 52 : axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=fontsize)

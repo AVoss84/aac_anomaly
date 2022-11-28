@@ -111,15 +111,12 @@ def ts_plot(x, y: np.array, vertical : list = None, title : str ="", xlabel : st
         fig, ax = plt.subplots(figsize=(20, 4.5), dpi=dpi)
         ax.plot(x, y, color='tab:blue', linestyle='-', marker='o', markerfacecolor='orange', label='Observation', **para)
         if vertical : 
-            plt.vlines(x=vertical, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='red', zorder=2, lw=.65, label='Anomaly',  linestyle='--')
+            plt.vlines(x=vertical, ymin=ax.get_ylim()[0], ymax=ax.get_ylim()[1], color='red', zorder=2, lw=.8, label='Anomaly',  linestyle='--')
         ax.set_title(title, fontdict={'fontsize': 16, 'fontweight': 'medium'})
-        #ax.axhline(1, color="red", linestyle="--")
-        # set monthly locator
+        fig.autofmt_xdate()
+        ax.set_xlim([x[0], x[len(x)-1]])
         ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-        # set formatter
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%W-%y'))
-        # set font and rotation for date tick labels
-        plt.gcf().autofmt_xdate()
         plt.xticks(rotation=70)
         plt.legend(loc = 'upper left')
         plt.tight_layout()
@@ -141,15 +138,15 @@ def anomaly_prob_plot(x, y: np.array, detect_thresh: float = 0.5, dpi : int = No
     fig, ax = plt.subplots(figsize=(20, 4), dpi=dpi)
     pro = plt.plot(x, y, color='tab:blue',label="Anomaly probability", linestyle='--', marker='o', markerfacecolor='orange', linewidth=1)
     plt.plot(x, [detect_thresh]*len(x), label="Decision threshold",  linewidth=.4, color="red", linestyle='--')
+    fig.autofmt_xdate()
+    ax.set_xlim([x[0], x[len(x)-1]])
     plt.gca().set(title="", xlabel="Time", ylabel="Probability", ylim = plt.ylim(-0.02, 1.05))   #plt.xlim(left=0)
     ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%W-%y'))
-    # set font and rotation for date tick labels
-    plt.gcf().autofmt_xdate()
     plt.xticks(rotation=70)
     plt.title(r'Anomaly probabilities $\pi_{t}, t=1,...,T$', fontdict = {'fontsize' : 14})
     plt.legend(loc='upper left')
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.show()  
     return fig
 
