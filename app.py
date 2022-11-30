@@ -26,7 +26,7 @@ from aac_ts_anomaly.resources import (config, preprocessor, trainer)
 
 # Set Page name and icon, Layout and sidebar expanded
 #--------------------------------------------------------
-img = Image.open(os.path.join(glob.UC_CODE_DIR,'templates','allianz_logo.jpg'))
+img = Image.open(os.path.join(glob.UC_CODE_DIR,'templates','allianz_logo.jpg'))    # page name icon
 st.set_page_config(page_title='Anomaly Report Creator', page_icon=img, layout="wide", initial_sidebar_state='expanded')
 #----------------------------------------------------------------------------------------------------------------------
 periodicity = 52
@@ -165,15 +165,15 @@ def main():
                         outlier_search_list = []
 
                     st.success("Training done!")
-                    st.info(f"{len(all_series)} time series analyzed")
+                    #st.write(f'{len(st.session_state.ts_labels)} anomalous claim views detected')
+                    st.info(f'{len(st.session_state.ts_labels)} of {len(all_series)} time series anomalous!')
                     #st.balloons()
             
             #---------------------------------------------------------------------------------------
             #st.markdown("***")
             st.text(" ")
 
-            label = st.selectbox('Select anomaly:', st.session_state.ts_labels)
-            #st.write('You selected:', label)
+            label = st.selectbox('Select anomaly (lob-erartbez):', st.session_state.ts_labels)
             st.session_state.label = label
             
             if st.session_state.label is not None:
@@ -210,9 +210,9 @@ def main():
                     #--------------------------------------------------------------------------------------
                     where = np.where(fitted_anomalies)[0] 
                     # Transformed
-                    #fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='')
+                    fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='')
                     # Original series:
-                    fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, dpi=100)
+                    #fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, dpi=100)
                     
                     # Plot anomaly probabilities:
                     #-----------------------------
@@ -241,10 +241,11 @@ def main():
                 # Draw Boxplot
                 fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(18,6))   # , dpi= 60
                 if df is not None:
-                    sns.boxplot(x='year', y='target', data=df, ax=axes[0])
-                    sns.boxplot(x='month', y='target', data=df, ax=axes[1]).set(ylabel="")
+                    df['log_target'] = np.log(1+ df['target'].values)   # for nicer boxplots
+                    sns.boxplot(x='year', y='log_target', data=df, ax=axes[0]).set(ylabel="log count")
+                    sns.boxplot(x='month', y='log_target', data=df, ax=axes[1]).set(ylabel="")
                     if periodicity == 52 :
-                        sns.boxplot(x='period', y='target', data=df, ax=axes[2], orient='v').set(
+                        sns.boxplot(x='period', y='log_target', data=df, ax=axes[2], orient='v').set(
                         xlabel='week', ylabel="")
                 #------------------------------------------------------------------------------------------
                 # Set Titles
@@ -262,4 +263,3 @@ def main():
 ###########
 main()
 
-# Next ToDos: deploy to AWS

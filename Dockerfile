@@ -1,4 +1,4 @@
-FROM tiangolo/uwsgi-nginx-flask:python3.8
+FROM tiangolo/uwsgi-nginx-flask:python3.7
 RUN apt-get clean -y && apt-get update -y
 RUN apt-get install bash
 RUN pip install --upgrade pip 

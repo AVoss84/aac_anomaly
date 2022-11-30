@@ -3,16 +3,16 @@ Services for reading and writing from and to various file formats
 """
 import pandas as pd
 from aac_ts_anomaly.config import global_config as glob
-#from aac_ts_anomaly.resources.blueprints import AbstractServices
+#import sqlalchemy as sql
 from imp import reload
 import os, yaml, toml, json
 from typing import (Dict, List, Text, Optional, Any, Callable, Union)
 
-class CSVService:
 
+class CSVService:
     def __init__(self, path : Optional[str] = "", delimiter : str = "\t", encoding : str = "UTF-8", schema_map : Optional[dict] = None, 
                  root_path : str = glob.UC_DATA_DIR, verbose : bool = False):
-        """Read/write service instance for CSV files
+        """Generic read/write service for CSV files
         Args:
             path (str, optional): Filename. Defaults to "".
             delimiter (str, optional): see pd.read_csv. Defaults to "\t".
@@ -21,13 +21,12 @@ class CSVService:
             root_path (str, optional): root path where file is located. Defaults to glob.UC_DATA_DIR.
             verbose (bool, optional): should user information be displayed? Defaults to False.
         """
-        #super().__init__()
         self.path = os.path.join(root_path, path)
         self.delimiter = delimiter
         self.verbose = verbose
         self.encoding = encoding
         self.schema_map = schema_map
-    
+
     def doRead(self, **kwargs)-> pd.DataFrame:
         """Read data from CSV
         Returns:
@@ -49,7 +48,6 @@ class CSVService:
 
 
 class XLSXService:
-
     def __init__(self, path : Optional[str] = "", sheetname : str = "Sheet1", root_path : str = glob.UC_DATA_DIR, schema_map : Optional[dict] = None, verbose : bool = False):
         """Generic read/write service for XLS files
         Args:
@@ -59,13 +57,12 @@ class XLSXService:
             schema_map (Optional[dict], optional): mapping scheme for renaming of columns, see pandas rename. Defaults to None.
             verbose (bool, optional): should user information be displayed?. Defaults to False.
         """
-        #super().__init__()
         self.path = os.path.join(root_path, path)
         self.writer = pd.ExcelWriter(self.path)
         self.sheetname = sheetname
         self.verbose=verbose
         self.schema_map = schema_map
-  
+        
     def doRead(self, **kwargs) -> pd.DataFrame:
         """Read from XLS file
         Returns:
@@ -96,7 +93,6 @@ class PickleService:
             schema_map (Optional[dict], optional): mapping scheme for renaming of columns, see pandas rename. Defaults to None.
             verbose (bool, optional): should user information be displayed?. Defaults to False.
         """
-        #super().__init__()
         self.path = os.path.join(root_path, path)
         self.schema_map = schema_map
         self.verbose=verbose
@@ -122,6 +118,7 @@ class PickleService:
         except Exception as e0:
             print(e0)
 
+
 class YAMLservice:
         def __init__(self, path : Optional[str] = "", root_path : str = glob.UC_CODE_DIR, verbose : bool = False):
             """Generic read/write service for YAML files
@@ -130,7 +127,6 @@ class YAMLservice:
                 root_path (str, optional): root path where file is located. Defaults to glob.UC_CODE_DIR.
                 verbose (bool, optional): should user information be displayed?. Defaults to False.
             """
-            #super().__init__()
             self.path = os.path.join(root_path, path)
             self.verbose = verbose 
         
@@ -167,7 +163,6 @@ class TXTService:
             root_path (Optional[str], optional): root path where file is located. Defaults to glob.UC_DATA_DIR.
             verbose (bool, optional): should user information be displayed?. Defaults to True.
         """
-        #super().__init__()
         self.path = os.path.join(root_path, path)
         self.verbose = verbose
 
@@ -202,14 +197,7 @@ class TXTService:
 
 class JSONservice:
         def __init__(self, path : Optional[str] = "", root_path : str = '', verbose = True):
-            """Generic read/write service for JSON files.
-
-            Args:
-                path (Optional[str], optional): _description_. Defaults to "".
-                root_path (str, optional): _description_. Defaults to ''.
-                verbose (bool, optional): _description_. Defaults to True.
-            """
-            #super().__init__()
+            
             self.path = os.path.join(root_path, path)
             self.verbose = verbose
         
@@ -249,7 +237,6 @@ class TOMLservice:
                 root_path (str, optional): _description_. Defaults to glob.UC_CODE_DIR.
                 verbose (bool, optional): _description_. Defaults to False.
             """
-            #super().__init__()
             self.root_path = root_path
             self.path = path
             self.verbose = verbose 

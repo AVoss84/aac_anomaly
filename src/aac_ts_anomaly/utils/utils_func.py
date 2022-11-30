@@ -34,9 +34,6 @@ def module_logger(mod_name : str, filename : str, **kwargs):
     return logger
 
 
-logger_utils = module_logger(__name__ + '.utils', os.path.join(glob.UC_DATA_PKG_DIR, 'utils.log'), mode='w')
-
-
 def get_filename_NN(input_filename : str, lookup_dict : dict):
 
     """
@@ -59,7 +56,7 @@ def get_filename_NN(input_filename : str, lookup_dict : dict):
     return distances, match    
 
 
-def get_newest_file(search_for : str = "AGCS Global Claims PIC - Notification Counts", 
+def get_newest_file(search_for : str = "Claims - Counts", 
                             src_dir : str = glob.UC_DATA_DIR, verbose : bool = False):
         """
         Detect newest input file in directory and return its name
@@ -135,7 +132,7 @@ def anomaly_prob_plot(x, y: np.array, detect_thresh: float = 0.5, dpi : int = No
     Returns:
         plt.figure.Figure: matplotlib object
     """
-    fig, ax = plt.subplots(figsize=(20, 4), dpi=dpi)
+    fig, ax = plt.subplots(figsize=(20, 3), dpi=dpi)
     pro = plt.plot(x, y, color='tab:blue',label="Anomaly probability", linestyle='--', marker='o', markerfacecolor='orange', linewidth=1)
     plt.plot(x, [detect_thresh]*len(x), label="Decision threshold",  linewidth=.4, color="red", linestyle='--')
     fig.autofmt_xdate()
