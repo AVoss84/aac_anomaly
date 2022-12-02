@@ -8,28 +8,33 @@ An ensemble of different time series anomaly detection methods is being construc
 
 ```
 ├── app.py
-├── config.toml
 ├── docker-compose.yaml
 ├── Dockerfile
 ├── environment.yml
 ├── README.md
 ├── requirements.txt
 ├── run_app_locally.sh
-├── src
-│   ├── aac_ts_anomaly
-│   │   ├── config
-│   │   │   ├── global_config.py
-│   │   ├── data
-│   │   │   ├── anomaly_history.pkl
-│   │   │   └── utils.log
-│   │   ├── resources
-│   │   ├── services
-│   │   └── utils
-│   ├── __init__.py
-│   ├── notebooks
-│   ├── setup.py
-│   └── templates
-└── uwsgi.ini
+└── src
+    ├── aac_ts_anomaly
+    │   ├── config
+    │   │   ├── aws_config.py
+    │   │   ├── global_config.py
+    │   │   ├── __init__.py
+    │   ├── data
+    │   ├── resources
+    │   ├── services
+    │   │   ├── file_aws.py
+    │   │   ├── file.py
+    │   │   ├── __init__.py
+    │   └── utils
+    │       ├── aggregation_functions.py
+    │       ├── __init__.py
+    │       ├── tsa_utils.py
+    │       └── utils_func.py
+    ├── __init__.py
+    ├── notebooks
+    ├── setup.py
+    └── templates
 ```
 
 ### Create conda environment with require packages installed
