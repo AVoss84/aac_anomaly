@@ -76,4 +76,3 @@ csv_buffer = StringIO()
 foo.to_csv(csv_buffer)
 
 s3.Object(bucket_name, 'df.csv').put(Body=csv_buffer.getvalue())
-
