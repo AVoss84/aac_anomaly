@@ -18,7 +18,7 @@ class claims_reporting(AbstractPreprocessor):
     Preprocessing class: Slices/aggregates the portfolio into univariate time series
     according to minimal sample size and median counts per series 
     """
-    def __init__(self, ts_col : str ='target', periodicity : int = 52):
+    def __init__(self, ts_col : str = 'target', periodicity : int = 52):
         
         self.target_col = ts_col  #ts_col: column name of target time series in df
         self.periodicity = periodicity    # 12 or 52 : seasonal period in the data. Currently: monthly, weekly (i.e. calendar weeks)

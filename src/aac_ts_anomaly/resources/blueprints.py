@@ -6,7 +6,6 @@ import subprocess, os, abc
 from datetime import datetime, date
 import dateutil.parser as dateparser
 from typing import (Dict, List, Text, Optional, Any, Callable, Union)
-from aac_ts_anomaly.utils import utils_func as utils
 from aac_ts_anomaly.config import global_config as glob
 #from aac_ts_anomaly.resources import config
 from abc import ABC, abstractmethod, abstractproperty
@@ -106,3 +105,4 @@ class AbstractServices(ABC):
     @abstractmethod 
     def doWrite(self, X, **others):
        pass 
+

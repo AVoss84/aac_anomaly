@@ -57,8 +57,7 @@ root_path = "anomaly_detection"
 
 obj = bucket.Object(os.path.join(root_path, path)).get()
 
-foo = pd.read_csv(obj['Body'], index_col=0)
-foo
+#foo = pd.read_csv(obj['Body'], index_col=0)
 
 # Import data:
 #---------------
@@ -66,3 +65,15 @@ csv = file_aws.CSVService(root_path=root_path, path="agg_time_series_52.csv", de
 
 data_orig = csv.doRead() ; data_orig.shape
 data_orig.head()
+
+
+from io import StringIO # python3; python2: BytesIO 
+import boto3
+
+foo = pd.DataFrame({'x': [1, 2, 3], 'y': ['a', 'b', 'c']})
+
+csv_buffer = StringIO()
+foo.to_csv(csv_buffer)
+
+s3.Object(bucket_name, 'df.csv').put(Body=csv_buffer.getvalue())
+

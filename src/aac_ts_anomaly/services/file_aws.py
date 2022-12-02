@@ -4,14 +4,13 @@ Services for reading and writing from and to AWS S3 of various file formats
 import pandas as pd
 from aac_ts_anomaly.config import global_config as glob
 from aac_ts_anomaly.config.aws_config import bucket_obj as bucket 
-#from aac_ts_anomaly.resources.blueprints import AbstractServices
+from aac_ts_anomaly.resources.blueprints import AbstractServices
 from imp import reload
 import os, yaml, toml, json
 from typing import (Dict, List, Text, Optional, Any, Callable, Union)
 from botocore.exceptions import ClientError
 
-
-class CSVService:
+class CSVService(AbstractServices):
 
     def __init__(self, path : Optional[str] = "", delimiter : str = "\t", encoding : str = "UTF-8", schema_map : Optional[dict] = None, 
                  root_path : str = glob.UC_DATA_DIR, verbose : bool = False):
@@ -24,6 +23,7 @@ class CSVService:
             root_path (str, optional): root path where file is located. Defaults to glob.UC_DATA_DIR.
             verbose (bool, optional): should user information be displayed? Defaults to False.
         """
+        super().__init__()
         self.path = os.path.join(root_path, path)
         self.delimiter = delimiter
         self.verbose = verbose
