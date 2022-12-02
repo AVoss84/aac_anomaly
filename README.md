@@ -27,10 +27,6 @@ An ensemble of different time series anomaly detection methods is being construc
     │   │   ├── file.py
     │   │   ├── __init__.py
     │   └── utils
-    │       ├── aggregation_functions.py
-    │       ├── __init__.py
-    │       ├── tsa_utils.py
-    │       └── utils_func.py
     ├── __init__.py
     ├── notebooks
     ├── setup.py
