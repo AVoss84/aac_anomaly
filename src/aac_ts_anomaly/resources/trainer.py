@@ -84,8 +84,8 @@ class trainer(claims_reporting):
             transf_hyper_para = self.transformers[self.model_transf]
             try:                
                 result_mul = sea.seasonal_decompose(self.val_series, extrapolate_trend='freq', **self.transformers['ClassicSeasonalDecomposition'])
-                #self.s_deseasonal = result_mul.observed - result_mul.seasonal   
-                self.s_deseasonal = result_mul.resid
+                self.s_deseasonal = result_mul.observed - result_mul.seasonal   
+                #self.s_deseasonal = result_mul.resid
 
                 # self.anomaly_transformer = eval(self.model_transf+"("+"**transf_hyper_para)")
                 # self.s_deseasonal = self.anomaly_transformer.fit_transform(self.val_series)

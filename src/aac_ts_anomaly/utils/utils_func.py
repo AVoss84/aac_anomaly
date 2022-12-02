@@ -75,7 +75,6 @@ def get_newest_file(search_for : str = "Claims - Counts",
             
 #---------------------------------------------------------------------------------------
 
-# Run time decorator for any function func:
 def timer(func):
     """Print the runtime of the decorated function"""
     @wraps(func)
@@ -92,7 +91,6 @@ def timer(func):
 
 def ts_plot(x, y: np.array, vertical : list = None, title : str ="", xlabel : str ='Time', ylabel : str ='target', dpi : int = None, **para):
         """Plot time series together with detected anomalies
-
         Args:
             x (_type_): _description_
             y (np.array): _description_
@@ -101,7 +99,6 @@ def ts_plot(x, y: np.array, vertical : list = None, title : str ="", xlabel : st
             xlabel (str, optional): _description_. Defaults to 'time'.
             ylabel (str, optional): _description_. Defaults to 'target'.
             dpi (int, optional): _description_. Defaults to None.
-
         Returns:
             plt.figure.Figure: matplotlib object
         """
@@ -112,6 +109,7 @@ def ts_plot(x, y: np.array, vertical : list = None, title : str ="", xlabel : st
         ax.set_title(title, fontdict={'fontsize': 16, 'fontweight': 'medium'})
         fig.autofmt_xdate()
         ax.set_xlim([x[0], x[len(x)-1]])
+        plt.gca().set(title=title, xlabel=xlabel, ylabel=ylabel)
         ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%W-%y'))
         plt.xticks(rotation=70)
@@ -121,14 +119,13 @@ def ts_plot(x, y: np.array, vertical : list = None, title : str ="", xlabel : st
         return fig     
 
 
-def anomaly_prob_plot(x, y: np.array, detect_thresh: float = 0.5, dpi : int = None, **para):
-    """Plot anomaly probabilities for each date
+def anomaly_prob_plot(x, y: np.array, detect_thresh: float = 0.5, title : str = "", xlabel : str ='Time', ylabel : str ='target', dpi : int = None, **para):
+    """
     Args:
         x (_type_): _description_
         y (np.array): _description_
-        detect_thresh (float, optional): _description_. Defaults to 0.5.
+        detect_thresh (float, optional): _description_. Defaults to 0.5
         dpi (int, optional): _description_. Defaults to None.
-
     Returns:
         plt.figure.Figure: matplotlib object
     """
@@ -137,11 +134,11 @@ def anomaly_prob_plot(x, y: np.array, detect_thresh: float = 0.5, dpi : int = No
     plt.plot(x, [detect_thresh]*len(x), label="Decision threshold",  linewidth=.4, color="red", linestyle='--')
     fig.autofmt_xdate()
     ax.set_xlim([x[0], x[len(x)-1]])
-    plt.gca().set(title="", xlabel="Time", ylabel="Probability", ylim = plt.ylim(-0.02, 1.05))   #plt.xlim(left=0)
+    plt.gca().set(title=title, xlabel=xlabel, ylabel="Probability", ylim = plt.ylim(-0.02, 1.05))   #plt.xlim(left=0)
     ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%W-%y'))
     plt.xticks(rotation=70)
-    plt.title(r'Anomaly probabilities $\pi_{t}, t=1,...,T$', fontdict = {'fontsize' : 14})
+    plt.title(r'Anomaly probabilities $\pi_{t}, t=1,...,T$', fontdict = {'fontsize' : 14, 'fontweight': 'medium'})
     plt.legend(loc='upper left')
     #plt.tight_layout()
     plt.show()  
@@ -220,7 +217,6 @@ def IQR(x: np.array, prob_upper_lower : list = [75 ,25]) -> float:
     Args:
         x (np.array): observations
         upper_lower (list, optional): list of upper lower percentiles (=prob.). Defaults to [75 ,25].
-
     Returns:
         float: IQR
     """

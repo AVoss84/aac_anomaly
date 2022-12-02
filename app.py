@@ -17,13 +17,13 @@ from copy import deepcopy
 from importlib import reload
 from adtk.visualization import plot
 import statsmodels.api as sm
-
 from aac_ts_anomaly.utils import tsa_utils as tsa
 from aac_ts_anomaly.utils import utils_func as util
 from aac_ts_anomaly.config import global_config as glob
 from aac_ts_anomaly.services import file
 from aac_ts_anomaly.resources import (config, preprocessor, trainer)
 
+#--------------------------------------------------------
 # Set Page name and icon, Layout and sidebar expanded
 #--------------------------------------------------------
 img = Image.open(os.path.join(glob.UC_CODE_DIR,'templates','allianz_logo.jpg'))    # page name icon
@@ -120,12 +120,6 @@ def main():
 
                 if 'filt_suspects_values' not in st.session_state: 
                     st.session_state.filt_suspects_values = {}
-
-                # if 'label' not in st.session_state:
-                # 	st.session_state.label = tseries_names[0]
-
-                # if 'sub_set' not in st.session_state:
-                # 	st.session_state.sub_set = tseries_values[0]
               
                 # st.button('TEST', key='my_button', on_click = widget_callback)
                 # #st.button('TEST', key='my_button', on_click=widget_callback, kwargs=dict(my_iter=my_test))
@@ -167,7 +161,7 @@ def main():
                     st.success("Training done!")
                     #st.write(f'{len(st.session_state.ts_labels)} anomalous claim views detected')
                     st.info(f'{len(st.session_state.ts_labels)} of {len(all_series)} time series anomalous!')
-                    #st.balloons()
+                #st.balloons()
             
             #---------------------------------------------------------------------------------------
             #st.markdown("***")
@@ -209,14 +203,16 @@ def main():
                     # Plot time series with anomalies: 
                     #--------------------------------------------------------------------------------------
                     where = np.where(fitted_anomalies)[0] 
-                    # Transformed
-                    fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='')
+                    # Transformed:
+                    #--------------
+                    fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='Calendar weeks', ylabel ='Target', dpi=100)
                     # Original series:
+                    #------------------
                     #fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, dpi=100)
                     
                     # Plot anomaly probabilities:
                     #-----------------------------
-                    fig_anom_prob = util.anomaly_prob_plot(x = fitted_anomaly_proba.index, y = fitted_anomaly_proba, detect_thresh = detect_thresh, dpi=100)
+                    fig_anom_prob = util.anomaly_prob_plot(x = fitted_anomaly_proba.index, y = fitted_anomaly_proba, detect_thresh = detect_thresh, xlabel='Calendar weeks', ylabel = "Probability", dpi=100)
                     #-------------------------------------------------------------------------------------
 
                     with tab_data: 
@@ -239,6 +235,7 @@ def main():
                 st.info(f"Series: {st.session_state.label}")
 
                 # Draw Boxplot
+                #--------------
                 fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(18,6))   # , dpi= 60
                 if df is not None:
                     df['log_target'] = np.log(1+ df['target'].values)   # for nicer boxplots
@@ -249,6 +246,7 @@ def main():
                         xlabel='week', ylabel="")
                 #------------------------------------------------------------------------------------------
                 # Set Titles
+                #------------
                 fontsize=12
                 axes[0].set_title('Yearly box plots\n(Trend)', fontsize=fontsize) 
                 axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=fontsize)
@@ -262,4 +260,3 @@ def main():
 # Run app:
 ###########
 main()
-
