@@ -80,11 +80,11 @@ def main():
 
             with tab_data:
                 dataset = st.expander(label = "Display full dataset")
+                #st.success(uploaded_file.name + ' successfully uploaded!')
                 #st.dataframe(data_orig.head(100))
                 with dataset:            
                     df0 = data_orig.rename(columns={'time': 'Time', target_col : 'Target'}, inplace=False)  # only for nicer displays
                     st.table(df0.tail(100))
-                    st.success(uploaded_file.name + ' successfully uploaded!')
 
             # def widget_callback():
             #     """Callback function to retrieve API states from a running streamlit server"""
