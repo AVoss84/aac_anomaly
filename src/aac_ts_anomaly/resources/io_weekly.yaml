@@ -9,7 +9,7 @@ detection:
        pre_filter :         # "Region!='South America'"
        ignore_lag : 1
        min_sample_size : 104
-       min_median_target : 30
+       min_median_target : 20
   training: 
        outlier_filter :            # defaults to None           # extend [..[ to [...]
        stat_transform : ['diff_log']    # ['none','diff', 'log', 'diff_log']

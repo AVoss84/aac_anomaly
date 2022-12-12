@@ -83,7 +83,7 @@ def main():
                 #st.dataframe(data_orig.head(100))
                 with dataset:            
                     df0 = data_orig.rename(columns={'time': 'Time', target_col : 'Target'}, inplace=False)  # only for nicer displays
-                    st.table(df0.head(100))
+                    st.table(df0.tail(100))
                     st.success(uploaded_file.name + ' successfully uploaded!')
 
             # def widget_callback():
@@ -163,7 +163,7 @@ def main():
                     st.info(f'{len(st.session_state.ts_labels)} of {len(all_series)} time series anomalous!')
                 #st.balloons()
             
-            #---------------------------------------------------------------------------------------
+            #------------------------------------------------------------------------------------------------------
             #st.markdown("***")
             st.text(" ")
 
@@ -232,29 +232,30 @@ def main():
                     if fig_anom_prob: st.pyplot(fig_anom_prob)  
 
             with tab_plots_season:
-                st.info(f"Series: {st.session_state.label}")
+                if fig_anom is not None: 
+                    st.info(f"Series: {st.session_state.label}")
 
-                # Draw Boxplot
-                #--------------
-                fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(18,6))   # , dpi= 60
-                if df is not None:
-                    df['log_target'] = np.log(1+ df['target'].values)   # for nicer boxplots
-                    sns.boxplot(x='year', y='log_target', data=df, ax=axes[0]).set(ylabel="log count")
-                    sns.boxplot(x='month', y='log_target', data=df, ax=axes[1]).set(ylabel="")
-                    if periodicity == 52 :
-                        sns.boxplot(x='period', y='log_target', data=df, ax=axes[2], orient='v').set(
-                        xlabel='week', ylabel="")
-                #------------------------------------------------------------------------------------------
-                # Set Titles
-                #------------
-                fontsize=12
-                axes[0].set_title('Yearly box plots\n(Trend)', fontsize=fontsize) 
-                axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=fontsize)
-                if periodicity == 52 : axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=fontsize)
-                #plt.yticks(rotation=15)
-                plt.xticks(rotation=45)
-                #plt.show()
-                st.pyplot(fig)   
+                    # Draw Boxplot
+                    #--------------
+                    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(18,6))   # , dpi= 60
+                    if df is not None:
+                        df['log_target'] = np.log(1+ df['target'].values)   # for nicer boxplots
+                        sns.boxplot(x='year', y='log_target', data=df, ax=axes[0]).set(ylabel="log count")
+                        sns.boxplot(x='month', y='log_target', data=df, ax=axes[1]).set(ylabel="")
+                        if periodicity == 52 :
+                            sns.boxplot(x='period', y='log_target', data=df, ax=axes[2], orient='v').set(
+                            xlabel='week', ylabel="")
+                    #------------------------------------------------------------------------------------------
+                    # Set Titles
+                    #------------
+                    fontsize=12
+                    axes[0].set_title('Yearly box plots\n(Trend)', fontsize=fontsize) 
+                    axes[1].set_title('Monthly box plots\n(Seasonality)', fontsize=fontsize)
+                    if periodicity == 52 : axes[2].set_title('Weekly box plots\n(Seasonality)', fontsize=fontsize)
+                    #plt.yticks(rotation=15)
+                    plt.xticks(rotation=45)
+                    #plt.show()
+                    st.pyplot(fig)   
 
 ###########
 # Run app:

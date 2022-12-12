@@ -6,7 +6,7 @@ EXPOSE 5000
 COPY . /app
 RUN pip install -r requirements.txt
 RUN pip install -e src
-RUN mkdir .streamlit 
-COPY config.toml .streamlit/config.toml     
+#RUN mkdir .streamlit 
+#COPY config.toml .streamlit/config.toml     
 WORKDIR /app
 CMD [ "streamlit", "run", "app.py" ]
