@@ -203,12 +203,14 @@ def main():
                     # Plot time series with anomalies: 
                     #--------------------------------------------------------------------------------------
                     where = np.where(fitted_anomalies)[0] 
+                    
                     # Transformed:
                     #--------------
-                    fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='Calendar weeks', ylabel ='Target', dpi=100)
+                    #fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='Calendar weeks', ylabel ='Target', dpi=100)
+                    
                     # Original series:
                     #------------------
-                    #fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, dpi=100)
+                    fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values/1000, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, dpi=100, ylabel ='Counts (thsd.)')
                     
                     # Plot anomaly probabilities:
                     #-----------------------------
