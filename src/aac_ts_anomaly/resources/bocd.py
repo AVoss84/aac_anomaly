@@ -187,6 +187,20 @@ def plot_posterior(T, data, cps, cps_estimated, R, pmean, pvar, plot_est_cps = T
 
     plt.tight_layout()
     plt.show()
-     
+
+   
+#T      = 1000   # Number of observations.
+#hazard = .01  # Constant prior on changepoint probability.
+#mean0  = 0      # The prior mean on the mean parameter.
+#var0   = 2      # The prior variance for mean parameter.
+#varx   = 1      # The known variance of the data.
+#data, cps      = generate_data(varx, mean0, var0, T, hazard)
+#model          = GaussianUnknownMean(mean0, var0, varx)
+#R, pmean, pvar, cps_MAP, cps_est = bocd(data, model, hazard, mini_run_length = T*.05)   
+
+
+
+
+
         
         
