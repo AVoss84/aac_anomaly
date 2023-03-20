@@ -1,12 +1,13 @@
-import streamlit as st
+import os, warnings, adtk, base64
+
 import pandas as pd
+from pandas_profiling import ProfileReport
+
 import numpy as np
-import base64
 import glob as gl
 from PIL import Image
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-import os, warnings, adtk
 warnings.filterwarnings("ignore")
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -17,6 +18,10 @@ from copy import deepcopy
 from importlib import reload
 from adtk.visualization import plot
 import statsmodels.api as sm
+
+import streamlit as st
+from streamlit_pandas_profiling import st_profile_report
+
 from aac_ts_anomaly.utils import tsa_utils as tsa
 from aac_ts_anomaly.utils import utils_func as util
 from aac_ts_anomaly.config import global_config as glob
@@ -27,7 +32,7 @@ from aac_ts_anomaly.resources import (config, preprocessor, trainer)
 # Set Page name and icon, Layout and sidebar expanded
 #--------------------------------------------------------
 img = Image.open(os.path.join(glob.UC_CODE_DIR,'templates','allianz_logo.jpg'))    # page name icon
-st.set_page_config(page_title='Anomaly Report Creator', page_icon=img, layout="wide", initial_sidebar_state='expanded')
+st.set_page_config(page_title='Anomaly Report', page_icon=img, layout="wide", initial_sidebar_state='expanded')
 #----------------------------------------------------------------------------------------------------------------------
 periodicity = 52
 anomaly_history = pd.DataFrame(columns=['time_anomaly', 'time_series_name', 'clm_cnt'])
@@ -57,10 +62,11 @@ def main():
     plot_space = st.container()
     
     with header:
-        tabs = st.tabs(["Data", "Anomalies", "Seasonality"])
+        tabs = st.tabs(["Data", "Anomalies", "Seasonality", "Statistics"])
         tab_data = tabs[0]
         tab_plots = tabs[1]
         tab_plots_season = tabs[2]
+        tab_profile = tabs[3]
 
     with st.sidebar:
         st.image(os.path.join(glob.UC_CODE_DIR,'templates','agcs_banner.png'), use_column_width=True)
@@ -85,6 +91,33 @@ def main():
                 with dataset:            
                     df0 = data_orig.rename(columns={'time': 'Time', target_col : 'Target'}, inplace=False)  # only for nicer displays
                     st.table(df0.tail(100))
+
+                                        # profile = df1.profile_report()
+                            # st.write(profile.html, unsafe_allow_html = True)
+                    
+            with tab_profile:
+                # profile = df1.profile_report()
+                # st.write(profile.html, unsafe_allow_html = True)
+                profile = ProfileReport(df0, title="My Data",
+                        dataset={
+                        "description": "Anomaly Reporter",
+                        "copyright_holder": "AAC",
+                        "copyright_year": "2023",
+                        "url": "https://thisismyblog.com",
+                    },
+                    variables={
+                        "descriptions": {
+                            "State_Name": "Name of the state",
+                            "District_Name": "Name of district",
+                            "Crop_Year": "Year when it was seeded",
+                            "Season": "Crop year",
+                            "Crop": "Which crop was seeded?",
+                            "Area": "How much area was allocated to the crop?",
+                            "Production": "How much production?",
+                        }
+                    }
+                )
+                st_profile_report(profile)
 
             # def widget_callback():
             #     """Callback function to retrieve API states from a running streamlit server"""
@@ -206,11 +239,11 @@ def main():
                     
                     # Transformed:
                     #--------------
-                    #fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='Calendar weeks', ylabel ='Target', dpi=100)
+                    fig_anom = util.ts_plot(fitted_val_series.index, fitted_val_series.values, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, xlabel='Calendar weeks', ylabel ='Target', dpi=100)
                     
                     # Original series:
                     #------------------
-                    fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values/1000, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, dpi=100, ylabel ='Counts (thsd.)')
+                    #fig_anom = util.ts_plot(df['year_period_ts'].values, df['target'].values/1000, vertical=fitted_anomalies[where].index.strftime("%Y-%m-%d").tolist(), title=main, dpi=100, ylabel ='Counts (thsd.)')
                     
                     # Plot anomaly probabilities:
                     #-----------------------------

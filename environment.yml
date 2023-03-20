@@ -7,6 +7,7 @@ dependencies:
   #- jupyter    # for use in Jupyter notebook
   #- ipykernel   # for recognition of conda env in Jupyter notebook
   - pip:
+    - streamlit-pandas-profiling 
     - DateTime==4.3
     - seaborn==0.11.*  
     - PyAstronomy==0.14.*

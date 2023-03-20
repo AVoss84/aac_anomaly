@@ -12,7 +12,7 @@ detection:
        min_median_target : 50
   training: 
        outlier_filter :            # defaults to None           # extend [..[ to [...]
-       stat_transform : ['none']    # ['none','diff', 'log', 'diff_log']
+       stat_transform : ['diff_log']    # ['none','diff', 'log', 'diff_log']
        hyper_para: 
           QuantileAD : {'high': 0.99, 'low' : 0.01}              
           PersistAD : {'c' : 1.5, 'side' : 'positive', 'window': 5, 'agg' : 'median'}
