@@ -11,5 +11,5 @@ RUN pip install -e src
 #COPY config.toml .streamlit/config.toml     
 WORKDIR /app
 #HEALTHCHECK CMD curl --fail http://localhost:8080/health
-CMD [ "streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0" ]
+CMD [ "streamlit", "run", "app.py", "--server.port=8080" ]
 #ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0"]

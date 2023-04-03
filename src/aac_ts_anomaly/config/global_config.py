@@ -6,8 +6,8 @@ from pathlib import Path
 #-------------------------------
 
 #using = 'local'                # Jupyter server
-using = 'vm'                   # own virtual machine
-#using = 'docker'                # Docker container
+#using = 'vm'                   # own virtual machine
+using = 'docker'                # Docker container
 
 ## Check if required environment variables exist
 ## if not apply default paths from test environment:
