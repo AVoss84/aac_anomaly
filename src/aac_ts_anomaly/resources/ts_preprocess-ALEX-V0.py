@@ -71,10 +71,19 @@ data_orig.head()
 data_orig.rename(columns={'time_index' : 'time', 'clm_cnt' : 'target' }, inplace=True)
 data_orig.head()
 
-df0 = deepcopy(data_orig)
-df0.rename(columns={'lob': 'Lob', 'erartbez': 'event_descr'}, inplace=True)
-df0.shape
-df0.head()
+# cond_lob = "HOUSEHOLDERS"
+# cond_erartbez = "Sturm"
+
+# data_filter = (data_orig['lob'] == cond_lob) & (data_orig['erartbez'] == cond_erartbez)
+# any(data_filter)
+
+# data_orig[data_filter]
+
+# df0 = deepcopy(data_orig)
+# df0.rename(columns={'lob': 'Lob', 'erartbez': 'event_descr'}, inplace=True)
+# df0.shape
+# df0.head()
+
 
 if pre_filter is not None:
         try:

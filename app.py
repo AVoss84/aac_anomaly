@@ -29,7 +29,7 @@ from aac_ts_anomaly.resources import (config, preprocessor, trainer)
 img = Image.open(os.path.join(glob.UC_CODE_DIR,'templates','allianz_logo.jpg'))    # page name icon
 st.set_page_config(page_title='Anomaly Report Creator', page_icon=img, layout="wide", initial_sidebar_state='expanded')
 #----------------------------------------------------------------------------------------------------------------------
-periodicity = 52
+periodicity = 52                                   # calendar weeks
 anomaly_history = pd.DataFrame(columns=['time_anomaly', 'time_series_name', 'clm_cnt'])
 config_detect = config.in_out52['detection']
 outlier_filter = config_detect['training']['outlier_filter']
@@ -84,7 +84,8 @@ def main():
                 #st.dataframe(data_orig.head(100))
                 with dataset:            
                     df0 = data_orig.rename(columns={'time': 'Time', target_col : 'Target'}, inplace=False)  # only for nicer displays
-                    st.table(df0.tail(100))
+                    #st.table(df0.tail(100))
+                    st.dataframe(df0, use_container_width=True)
 
             # def widget_callback():
             #     """Callback function to retrieve API states from a running streamlit server"""
@@ -158,16 +159,16 @@ def main():
                     except Exception as ex:
                         outlier_search_list = []
 
-                    st.success("Training done!")
+                    st.success("Training done")
                     #st.write(f'{len(st.session_state.ts_labels)} anomalous claim views detected')
-                    st.info(f'{len(st.session_state.ts_labels)} of {len(all_series)} time series anomalous!')
+                    st.info(f'{len(st.session_state.ts_labels)} of {len(all_series)} time series anomalous')
                 #st.balloons()
             
             #------------------------------------------------------------------------------------------------------
             #st.markdown("***")
             st.text(" ")
 
-            label = st.selectbox('Select anomaly (lob-erartbez):', st.session_state.ts_labels)
+            label = st.selectbox('Select anomaly (lob - erartbez):', st.session_state.ts_labels)
             st.session_state.label = label
             
             if st.session_state.label is not None:
@@ -223,7 +224,8 @@ def main():
 
                         with dataset_sub:            
                             df1 = df.rename(columns={'month': 'Month', 'time': 'Time', target_col : 'Target'}, inplace=False) 
-                            st.table(df1[['Time', 'Month','Target']])
+                            #st.table(df1[['Time', 'Month','Target']])
+                            st.dataframe(df1[['Time', 'Month','Target']], use_container_width=True)
 
             #---------------------------------------------------------------------------------------------------
             with tab_plots:
