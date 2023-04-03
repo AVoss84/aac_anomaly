@@ -7,4 +7,6 @@ file="config.toml";
 # chmod 777 $file
 #echo "$file has been updated!";
 # Run app:
-streamlit run app.py;
+#streamlit run app.py ;
+streamlit run app.py --server.port=8080 --server.address=127.0.0.1;
+
