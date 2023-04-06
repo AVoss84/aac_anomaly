@@ -27,7 +27,7 @@ from aac_ts_anomaly.resources import (config, preprocessor, trainer)
 # Set Page name and icon, Layout and sidebar expanded
 #--------------------------------------------------------
 img = Image.open(os.path.join(glob.UC_CODE_DIR,'templates','allianz_logo.jpg'))    # page name icon
-st.set_page_config(page_title='Anomaly Report Creator', page_icon=img, layout="wide", initial_sidebar_state='expanded')
+st.set_page_config(page_title='Anomaly Reporter', page_icon=img, layout="wide", initial_sidebar_state='expanded')
 #----------------------------------------------------------------------------------------------------------------------
 periodicity = 52                                   # calendar weeks
 anomaly_history = pd.DataFrame(columns=['time_anomaly', 'time_series_name', 'clm_cnt'])
