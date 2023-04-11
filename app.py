@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import base64
+import base64, time
 import glob as gl
 from PIL import Image
 from datetime import datetime, date
@@ -158,10 +158,13 @@ def main():
                         outlier_search_list = train0.time_index[where:]
                     except Exception as ex:
                         outlier_search_list = []
-
-                    st.success("Training done")
+    
+                    success = st.success("Training done")
                     #st.write(f'{len(st.session_state.ts_labels)} anomalous claim views detected')
-                    st.info(f'{len(st.session_state.ts_labels)} of {len(all_series)} time series anomalous')
+                    alert = st.info(f'{len(st.session_state.ts_labels)} of {len(all_series)} time series anomalous')
+                    time.sleep(10) # Wait some seconds then 
+                    success.empty() # clear the message
+                    alert.empty()
                 #st.balloons()
             
             #------------------------------------------------------------------------------------------------------
